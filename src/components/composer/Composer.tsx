@@ -19,9 +19,11 @@ const UnstyledComposer = (props) => {
   const [containerWidth, setContainerWidth] = useState(undefined)
 
   useEffect(() => {
-    window.addEventListener("resize", resizeHandler)
+    if (!containerWidth) {
+      setContainerWidth(container.current.clientWidth)
+    }
 
-    console.log(containerWidth)
+    window.addEventListener("resize", resizeHandler)
 
     return () => {
       window.removeEventListener("resize", resizeHandler)
