@@ -1,17 +1,18 @@
 import { css } from "styled-components"
 
-const colors = {
+export const colors = {
   black: "#2f2f2f",
-  blue: "00a6fb",
-  green: "23ce8b",
+  blue: "#00a6fb",
+  green: "#23ce8b",
   grey: "#969392",
   offwhite: "#fbf5f3",
   red: "#ff6767",
   white: "#fbfbfb"
 };
 
-export const global = css`
+export const basic = css`
   color: ${colors.black};
+  .text-right { text-align: right }
   .text-underline { text-decoration: underline }
   .opacity-7 { opacity: .7 }
 `

@@ -3,7 +3,7 @@ import styled from "styled-components"
 
 const SVG_HEIGHT = 67.5;
 const SVG_WIDTH = 400;
-const SVG_INITIAL_SCALE = 1.5;
+const SVG_INITIAL_SCALE = 1.975;
 const SVG_COMPENSATED_WIDTH = SVG_WIDTH * SVG_INITIAL_SCALE;
 const SVG_COMPENSATED_HEIGHT = SVG_HEIGHT * SVG_INITIAL_SCALE;
 
