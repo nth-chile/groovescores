@@ -3,14 +3,9 @@ import Abc2SvgDrums from "react-abc2svg-drums"
 
 /*
 Ghost Note	!(.!!).!note
-Hi-Hat	^g
-Crash	^c'
-Stacker	^d'
-Ride	^A'
-Ride Bell	^B'
-Cow Bell	^D'
+Ride ^g
+Crash	^A'
 Cross Stick	^c
-Foot Splash	^d
 */
 
 interface Props {

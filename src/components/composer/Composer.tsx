@@ -83,7 +83,7 @@ const Composer = styled(UnstyledComposer)`
     margin-bottom: 17px;
     padding: 17px 33px;
     box-sizing: border-box;
-    //overflow: hidden;
+    overflow: hidden;
   }
   .music {
     font: 24px music;
