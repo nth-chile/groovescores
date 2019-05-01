@@ -12,7 +12,7 @@ const CLEF_AND_TIME_SIG_WIDTH = 70; // Offset for the beginning edge of first no
 // Initial content of staff
 const INITIAL_CONTENT = [
   {
-    sections: ["[z]4"]
+    sections: ["[z]2", "[z]2"]
   },
   {
     sections: ["[z]4"]
@@ -59,7 +59,7 @@ const UnstyledStaff = (props: { maxWidth: number, className?: string }) => {
     const barSections = content[barIndex].sections;
     let writeableBarStartPos: number
     let writableBarWidth: number
-    let accumulatedSectionWithPaddingWidth: number = 0
+    let accumulatedSectionWidth: number = 0
   
     // Determine writeableBarStartPos and writableBarWidth
     if (barIndex === 0) {
@@ -76,9 +76,9 @@ const UnstyledStaff = (props: { maxWidth: number, className?: string }) => {
       let float = parseFloat(split[0]) / parseFloat(split[1])
       let percentage = float / 4 * 100                          // convert to percentage
       let writeableCurrentSectionWidth = percentage * writableBarWidth / 100     // convert that to pixels
-      let writeableSectionStartPos = writeableBarStartPos + accumulatedSectionWithPaddingWidth
-      let writeableSectionEndPos = writeableBarStartPos + accumulatedSectionWithPaddingWidth + writeableCurrentSectionWidth
-//debugger
+      let writeableSectionStartPos = writeableBarStartPos + accumulatedSectionWidth
+      let writeableSectionEndPos = writeableBarStartPos + accumulatedSectionWidth + writeableCurrentSectionWidth
+
       if (writeableSectionStartPos < x && x < writeableSectionEndPos + BAR_X_PADDING) { // compare to x
         console.log(`
           Bar Index: ${barIndex}
@@ -93,8 +93,8 @@ const UnstyledStaff = (props: { maxWidth: number, className?: string }) => {
         break;
       }
 
-      // if no match, add to `accumulatedSectionWithPaddingWidth`
-      accumulatedSectionWithPaddingWidth += writeableCurrentSectionWidth + (BAR_X_PADDING * 2)
+      // if no match, add to `accumulatedSectionWidth`
+      accumulatedSectionWidth += writeableCurrentSectionWidth
     }
   }
 
