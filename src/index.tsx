@@ -15,7 +15,6 @@ const App = () =>
 
         {/* <Groove
             timeSignature="4/4"
-            noteLength="1/16"
             basicAbcDrumsNotation="F4F4F4F4|F4F4F4F4"
         /> */}
     </React.Fragment>

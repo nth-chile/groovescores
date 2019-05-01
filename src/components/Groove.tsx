@@ -13,18 +13,19 @@ Cross Stick	^c
 Foot Splash	^d
 */
 
-interface GrooveProps {
+interface Props {
   timeSignature: string;
-  noteLength: string;
   basicAbcDrumsNotation: string;
 }
 
-const Groove = (props) => {
+const Groove = (Props) => {
     return (
       <Abc2SvgDrums
-          {...props}
-          showDrumsErrors
-        />
+        basicAbcDrumsNotation={Props.basicAbcDrumsNotation}
+        noteLength="1/4"
+        showDrumsErrors
+        timeSignature={Props.timeSignature}
+      />
     )
 }
 
