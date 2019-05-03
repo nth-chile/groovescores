@@ -1,3 +1,3 @@
 export * from "./Composer";
-export * from "./QuarterNote";
+export * from "./Note";
 export * from "./Staff";

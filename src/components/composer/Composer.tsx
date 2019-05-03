@@ -5,7 +5,6 @@ import * as commonStyles from "../../commonStyles"
 import {
   Button,
   Navbar,
-  QuarterNote,
   Staff,
   TagEditor
 } from ".."

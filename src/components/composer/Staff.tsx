@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useState, useRef } from "react"
 import styled from "styled-components"
 import throttle from "lodash/throttle"
+import { Note } from "."
+import * as NoteSVGs from "./noteSVGs"
 
 const SVG_HEIGHT = 67.5
 const SVG_WIDTH = 400
@@ -64,14 +66,19 @@ const getSectionLengthAsFraction = (sections: Array<string>, sectionIndex: numbe
   return `${matchArray[1]}/${matchArray[2] || 1}`
 }
 
-const UnstyledStaff = (props: { maxWidth: number, className?: string }) => {
+interface StaffProps {
+  className?: string;
+  maxWidth: number;
+}
+
+const UnstyledStaff = (StaffProps) => {
   const [content, setContent] = useState(INITIAL_CONTENT)
   const [yMouseOffset, setYMouseOffset] = useState(null)
   const [hoveredNotePosition, setHoveredNotePosition] = useState(null)
   const staffLineWidthBeforeScale =
-    SVG_WIDTH < props.maxWidth - (SVG_WIDTH_TIMES_SCALE - SVG_WIDTH) ?
+    SVG_WIDTH < StaffProps.maxWidth - (SVG_WIDTH_TIMES_SCALE - SVG_WIDTH) ?
     SVG_WIDTH - 1.5 :
-    SVG_WIDTH * props.maxWidth / SVG_WIDTH_TIMES_SCALE - 1.5
+    SVG_WIDTH * StaffProps.maxWidth / SVG_WIDTH_TIMES_SCALE - 1.5
   const firstBarLinePosBeforeScale = 205.8 / 398.5 * staffLineWidthBeforeScale
   const svgRef = useRef(null)
   const mousemoveHandler = useCallback(throttle((e) => {
@@ -155,12 +162,19 @@ const UnstyledStaff = (props: { maxWidth: number, className?: string }) => {
   }
 
   return (
-    <>
+    <div className={`music ${StaffProps.className}`}>
+      <Note
+        colorState="unplaced"
+        SVG={NoteSVGs.QuarterNote}
+        scale={SVG_SCALE}
+        x={0}
+        y={0}
+      />
       <svg
       xmlns="http://www.w3.org/2000/svg"
       version="1.1"
       color="black"
-      className={`music ${props.className}`}
+      className="music"
       strokeWidth=".7"
       width={`${SVG_WIDTH}px`}
       height={`${SVG_HEIGHT_TIMES_SCALE}px`}
@@ -183,8 +197,7 @@ const UnstyledStaff = (props: { maxWidth: number, className?: string }) => {
       <text></text>
       </g>
     </svg>
-    <div className="fake-note" style={{
-      top: `${hoveredNotePosition + 41}px`,
+    <div className="unplaced-note" style={{
       height: "11px",
       left: "150px",
       width: "11px",
@@ -192,15 +205,19 @@ const UnstyledStaff = (props: { maxWidth: number, className?: string }) => {
       borderRadius: "8px",
       position: "absolute"
     }}></div>
-    </>
+    </div>
   )
 }
 
-const Staff = styled(UnstyledStaff)`
-  transform: scale(${SVG_SCALE});
+const Staff = styled(UnstyledStaff)<StaffProps>`
+  position: relative;
 
-  .fake-note {
-    
+  svg.music {
+    transform: scale(${SVG_SCALE});
+  }
+  
+  .unplaced-note {
+    top: ${props => props.hoveredNotePosition + 41}px;
   }
 `
 
