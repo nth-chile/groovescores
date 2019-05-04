@@ -6,12 +6,24 @@ import {
   Button,
   Navbar,
   Staff,
-  TagEditor
+  TagEditor,
+  Toolbar
 } from ".."
 
-const UnstyledComposer = (props) => {
+interface ComposerProps {
+  className?: string;
+}
+
+const UnstyledComposer = (ComposerProps) => {
+  const [noteType, setNoteType] = useState("note")
+  const [noteLength, setNoteLength] = useState("1/4")
+
   const container = useRef(null)
   const xPadding = 66; // The x-padding of .groove
+
+  useEffect(() => {
+    console.log(noteType, noteLength)
+  }, [noteType, noteLength])
 
   const resizeHandler = useCallback(throttle(() => {
     setContainerWidth(container.current.clientWidth)
@@ -34,13 +46,13 @@ const UnstyledComposer = (props) => {
   return (
     <>
       <Navbar />
-      <div className={props.className}>
+      <div className={ComposerProps.className}>
         <div className="content">
-          <div className="toolbar">
-            Toolbar
-          </div>
+          <Toolbar
+            setNoteType={setNoteType}
+            setNoteLength={setNoteLength}
+          />
 
-        
           <div className="groove" ref={container}>
             <div className="opacity-7">by <span className="text-underline">user</span></div>
             <Staff maxWidth={containerWidth - xPadding} />
@@ -64,7 +76,7 @@ const UnstyledComposer = (props) => {
   )
 }
 
-const Composer = styled(UnstyledComposer)`
+const Composer = styled(UnstyledComposer)<ComposerProps>`
   ${commonStyles.basic}  
   ${commonStyles.openSans}
   margin: 0 85px;

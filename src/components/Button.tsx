@@ -18,7 +18,7 @@ const UnstyledButton = (Props) => {
 const Button = styled(UnstyledButton)`
   background-color: ${styles.colors.blue};
   border: none;
-  border-radius: 2px;
+  border-radius: 3px;
   color: ${styles.colors.offwhite};
   cursor: pointer;
   font-size: 12px;

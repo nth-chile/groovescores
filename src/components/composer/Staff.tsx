@@ -32,33 +32,26 @@ const UnstyledStaff = (StaffProps) => {
   const [content, setContent] = useState(INITIAL_CONTENT)
   const [yMouseOffset, setYMouseOffset] = useState(null)
   const [unplacedNotePosition, setUnplacedNotePosition] = useState(null)
-  const staffLineWidthBeforeScale =
-    SVG_WIDTH < StaffProps.maxWidth - (SVG_WIDTH_TIMES_SCALE - SVG_WIDTH) ?
-    SVG_WIDTH - 1.5 :
-    SVG_WIDTH * StaffProps.maxWidth / SVG_WIDTH_TIMES_SCALE - 1.5
+
+  const staffLineWidthBeforeScale = SVG_WIDTH < StaffProps.maxWidth - (SVG_WIDTH_TIMES_SCALE - SVG_WIDTH) ? SVG_WIDTH - 1.5 : SVG_WIDTH * StaffProps.maxWidth / SVG_WIDTH_TIMES_SCALE - 1.5
   const firstBarLinePosBeforeScale = 205.8 / 398.5 * staffLineWidthBeforeScale
   const svgRef = useRef(null)
   const mousemoveHandler = useCallback(throttle((e) => {
     setYMouseOffset(e.offsetY)
   }, 25, {leading: true, trailing: false}), [])
   
-  // Assign evt listener for clicks on staff
+  // Assign event listeners
   useEffect(() => {
     if (svgRef !== null) {
       svgRef.current.onclick = (e) => {
         logSection(e.offsetX, e.offsetY)
       }
-
-      return () => svgRef.current.onclick = null;
-    }
-  })
-
-  // Assign evt listener for mousemove on staff
-  useEffect(() => {
-    if (svgRef !== null) {
       svgRef.current.onmousemove = mousemoveHandler
 
-      return () => svgRef.current.onmousemove = null;
+      return () => {
+        svgRef.current.onclick = null;
+        svgRef.current.onmousemove = null;
+      }
     }
   })
 
@@ -67,7 +60,6 @@ const UnstyledStaff = (StaffProps) => {
     const noteTopPos = intendedNote && utils.noteTopPosByAbcNote[intendedNote]
 
     setUnplacedNotePosition(noteTopPos)
-    console.log(utils.intendedNoteByMouseY(yMouseOffset * SVG_SCALE))
   }, [yMouseOffset])
 
   const logSection = (x, y) => {
