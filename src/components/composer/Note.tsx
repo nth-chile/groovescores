@@ -5,6 +5,7 @@ import * as styles from "../../commonStyles"
 interface NoteProps {
   className?: string;
   colorState: "unplaced" | "normal" | "selected" | "hovered";
+  ghostNote: boolean;
   scale: number;
   SVG: React.ReactNode;
   x: number;
@@ -14,6 +15,7 @@ interface NoteProps {
 const UnstyledNote = (NoteProps) =>
   <NoteProps.SVG
       className={NoteProps.className}
+      ghostNote={NoteProps.ghostNote}
       y={NoteProps.y} // Pass y coordinate to individual note, to make proper vertical position adjustments
   />
 

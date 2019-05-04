@@ -103,3 +103,20 @@ export const noteTopPosByAbcNote = {
   "E": ETop, 
   "^D": DTop
 };
+
+export const optionsToNoteSVG = (options) => {
+  switch (true) {
+    case options.noteLength === "1":
+      return "WholeNote"
+    case options.noteLength === "1/2":
+      return "HalfNote"
+    case options.noteLength === "1/4":
+      return "QuarterNote"
+    case options.noteLength === "1/8":
+      return "EighthNote"
+    case options.noteLength === "1/16":
+      return "SixteenthNote"
+    case options.noteLength === "1/32":
+      return "ThirtysecondNote"
+  }
+}

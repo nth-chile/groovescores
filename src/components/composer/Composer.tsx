@@ -55,7 +55,10 @@ const UnstyledComposer = (ComposerProps) => {
 
           <div className="groove" ref={container}>
             <div className="opacity-7">by <span className="text-underline">user</span></div>
-            <Staff maxWidth={containerWidth - xPadding} />
+            <Staff
+              maxWidth={containerWidth - xPadding}
+              toolbarState={{ noteLength, noteType }}  
+            />
             <div>
               <svg xmlns="http://www.w3.org/2000/svg" width="45" height="44" className="playBtn">
                 <g fill="none" fillRule="nonzero">
@@ -71,21 +74,6 @@ const UnstyledComposer = (ComposerProps) => {
           <Button text="Publish"/>
         </div>
         </div>
-
-
-        <svg xmlns="http://www.w3.org/2000/svg" version="1.1" color="black" className="music" strokeWidth=".7" width="882px" height="78px">
-          <path className="sW" d="m95.0 68.0v-21.0"></path>
-          <text x="94.7" y="47.0"></text>
-          <text x="87.8" y="68.0"></text>
-          <path className="sW" d="m117.3 68.0v-21.0"></path>
-          <text x="110.1" y="68.0"></text>
-          <path className="sW" d="m161.9 68.0v-25.0"></path>
-          <text x="161.6" y="46.5"></text>
-          <text x="154.7" y="68.0"></text>
-          <path className="sW" d="m177.6 68.0v-21.0"></path>
-          <text x="170.4" y="68.0"></text>
-        </svg>
-
       </div>
     </>
   )

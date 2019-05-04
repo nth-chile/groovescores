@@ -26,6 +26,7 @@ const INITIAL_CONTENT = [
 interface StaffProps {
   className?: string;
   maxWidth: number;
+  toolbarState: object;
 }
 
 const UnstyledStaff = (StaffProps) => {
@@ -118,7 +119,8 @@ const UnstyledStaff = (StaffProps) => {
       {unplacedNotePosition &&
         <Note
           colorState="unplaced"
-          SVG={NoteSVGs.SixteenthNote}
+          ghostNote={StaffProps.toolbarState.noteType === "ghost note"}
+          SVG={NoteSVGs[utils.optionsToNoteSVG(StaffProps.toolbarState)]}
           scale={SVG_SCALE}
           x={170}
           y={unplacedNotePosition}
