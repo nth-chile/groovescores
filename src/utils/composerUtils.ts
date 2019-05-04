@@ -105,18 +105,23 @@ export const noteTopPosByAbcNote = {
 };
 
 export const optionsToNoteSVG = (options) => {
+  let typeString;
+
+  if (options.noteType === "note") typeString = "Note";
+  if (options.noteType === "rest") typeString = "Rest";
+
   switch (true) {
     case options.noteLength === "1":
-      return "WholeNote"
+      return `Whole${typeString}`
     case options.noteLength === "1/2":
-      return "HalfNote"
+      return `Half${typeString}`
     case options.noteLength === "1/4":
-      return "QuarterNote"
+      return `Quarter${typeString}`
     case options.noteLength === "1/8":
-      return "EighthNote"
+      return `Eighth${typeString}`
     case options.noteLength === "1/16":
-      return "SixteenthNote"
+      return `Sixteenth${typeString}`
     case options.noteLength === "1/32":
-      return "ThirtysecondNote"
+      return `Thirtysecond${typeString}`
   }
 }

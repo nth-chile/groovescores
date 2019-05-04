@@ -15,7 +15,7 @@ const App = () =>
 
         <Groove
             timeSignature="4/4"
-            basicAbcDrumsNotation="!(.!!).!^DE/4!(.!!).!EE/8EE/2!(.!!).!EE2E4FGAB!(.!!).!cdef^g^A'"
+            basicAbcDrumsNotation="z/8z/4z/2zz2z4"
         />
     </React.Fragment>
 
