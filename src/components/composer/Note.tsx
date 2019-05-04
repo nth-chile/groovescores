@@ -11,29 +11,11 @@ interface NoteProps {
   y: number;
 }
 
-const UnstyledNote = (NoteProps) => {
-  return (
-    <NoteProps.SVG
+const UnstyledNote = (NoteProps) =>
+  <NoteProps.SVG
       className={NoteProps.className}
-    />
-    
-    
-    // <svg
-    //   xmlns="http://www.w3.org/2000/svg"
-    //   version="1.1"
-    //   // xmlns:xlink="http://www.w3.org/1999/xlink"
-    //   color="black"
-    //   className={`music ${NoteProps.className}`}
-    //   strokeWidth=".7"
-    //   height="46px"
-    //   width="8px"
-    //   // viewBox="0 0 8 46"
-    // >
-    //   <path className="sW" d="m7.2 21v-21.0"></path>
-    //   <text y="21"></text>
-    // </svg>
-  )
-}
+      y={NoteProps.y} // Pass y coordinate to individual note, to make proper vertical position adjustments
+  />
 
 const colorStateToHex = {
   unplaced: styles.colors.grey,
@@ -46,8 +28,8 @@ const Note = styled(UnstyledNote)`
   color: ${NoteProps => colorStateToHex[NoteProps.colorState]};
   position: absolute;
   left: ${NoteProps => NoteProps.x}px;
-  top: ${NoteProps => NoteProps.y}px;
   transform: scale(${NoteProps => NoteProps.scale});
+  transform-origin: top left;
 `;
 
 export { Note }
