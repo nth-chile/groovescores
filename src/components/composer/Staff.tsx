@@ -118,7 +118,7 @@ const UnstyledStaff = (StaffProps) => {
       {unplacedNotePosition &&
         <Note
           colorState="unplaced"
-          SVG={NoteSVGs.QuarterNote}
+          SVG={NoteSVGs.SixteenthNote}
           scale={SVG_SCALE}
           x={170}
           y={unplacedNotePosition}

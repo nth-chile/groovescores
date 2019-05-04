@@ -1,6 +1,6 @@
 import React from "react"
 
-const QuarterNote = (props: { className: string, y: number }) =>
+const HalfNote = (props: { className: string, y: number }) =>
   <svg
     xmlns="http://www.w3.org/2000/svg"
     version="1.1"
@@ -12,8 +12,9 @@ const QuarterNote = (props: { className: string, y: number }) =>
       top: `${props.y - 35}px`
     }}
   >
-    <path className="sW" d="m7.2 21v-21.0"></path>
-    <text y="21"></text>
+    <path className="sW" d="m7.2 21.0v-21.0"></path>
+    <text y="21"></text>
   </svg>
 
-export { QuarterNote }
+export { HalfNote }
+
