@@ -67,10 +67,13 @@ const UnstyledComposer = (ComposerProps) => {
 
           <div className="groove" ref={container}>
             <div className="opacity-7">by <span className="text-underline">user</span></div>
-            <Staff
-              maxWidth={containerWidth - xPadding}
-              toolbarState={{ noteLength, noteType }}  
-            />
+            {
+              containerWidth &&
+              <Staff
+                maxWidth={containerWidth - xPadding}
+                toolbarState={{ noteLength, noteType }}  
+              />
+            }
             <div>
               <svg xmlns="http://www.w3.org/2000/svg" width="45" height="44" className="playBtn">
                 <g fill="none" fillRule="nonzero">

@@ -21,14 +21,14 @@ interface IBarObj {
   noteStartPositions: Array<number>;
 }
 
-type TContent = [IBarObj, IBarObj]
+type TContent = Array<IBarObj>
 
 // Initial content of staff
 let INITIAL_CONTENT: TContent = [
   {
     barStart: CLEF_AND_TIME_SIG_WIDTH + BAR_X_PADDING,
     barWidth: undefined,
-    notes: ["[z]4"],
+    notes: ["[z]2", "[z]2"],
     noteStartPositions: [],
   },
   {
@@ -46,7 +46,7 @@ interface StaffProps {
 }
 
 const UnstyledStaff = (StaffProps) => {
-  const [yMouseOffset, setYMouseOffset] = useState(null)
+  const [mouseOffset, setMouseOffset] = useState(null)
   const [unplacedNotePosition, setUnplacedNotePosition] = useState(null)
  
   const staffLineWidthBeforeScale = SVG_WIDTH < StaffProps.maxWidth - (SVG_WIDTH_TIMES_SCALE - SVG_WIDTH) ? SVG_WIDTH - 1.5 : SVG_WIDTH * StaffProps.maxWidth / SVG_WIDTH_TIMES_SCALE - 1.5
@@ -58,7 +58,7 @@ const UnstyledStaff = (StaffProps) => {
   const svgRef = useRef(null)
 
   const mousemoveHandler = useCallback(throttle((e) => {
-    setYMouseOffset(e.offsetY)
+    setMouseOffset([e.offsetX, e.offsetY])
   }, 25, {leading: true, trailing: false}), [])
 
   INITIAL_CONTENT[1].barStart = firstBarLinePosAfterScale + BAR_X_PADDING
@@ -66,11 +66,46 @@ const UnstyledStaff = (StaffProps) => {
   INITIAL_CONTENT[1].barWidth = staffLineWidthAfterScale - firstBarLinePosAfterScale - (BAR_X_PADDING * 2)
   const [content, setContent] = useState<TContent>(INITIAL_CONTENT)
 
+  // Update content when content[x].notes changes
+  useEffect(() => {
+    // Shallow clone state
+    let newContent = [...content];
+
+    for (let i = 0; i < content.length; i++) {
+      let notePos = content[i].barStart
+      let newNoteStartPositions = [];
+
+      // Get and push note start positions to newNoteStartPositions
+      for(let j = 0; j < content[i].notes.length; j++) {
+        const note = content[i].notes[j]
+        const currentNoteWidth = utils.getNoteWidthInPx(note, content[i].barWidth)
+        let currentNoteStartPos = notePos
+        notePos += currentNoteWidth
+
+        // Exception: if only one note, center it
+        if (content[i].notes.length === 1) {
+          currentNoteStartPos = content[i].barStart + (content[i].barWidth / 2) - 5
+        }
+
+        newNoteStartPositions.push(currentNoteStartPos)
+      }
+
+      // Update newContent
+      newContent[i] = {
+        ...newContent[i],
+        noteStartPositions: newNoteStartPositions
+      }
+    }
+    
+    // Set content
+    setContent(newContent)
+  }, [content[0].notes, content[1].notes ])
+
   // Assign event listeners
   useEffect(() => {
     if (svgRef !== null) {
       svgRef.current.onclick = (e) => {
-        logSection(e.offsetX, e.offsetY)
+        intendedNoteDataByMouseX(e.offsetX)
       }
       svgRef.current.onmousemove = mousemoveHandler
 
@@ -82,36 +117,51 @@ const UnstyledStaff = (StaffProps) => {
   })
 
   useEffect(() => {
-    const intendedNote = utils.intendedNoteByMouseY(yMouseOffset * SVG_SCALE)
-    const noteTopPos = intendedNote && utils.noteTopPosByAbcNote[intendedNote]
+    if (mouseOffset !== null) {
+      const intendedNote = utils.intendedNoteByMouseY(mouseOffset[1] * SVG_SCALE)
+      const noteYPos = intendedNote && utils.noteTopPosByAbcNote[intendedNote]
+      const noteData = intendedNoteDataByMouseX(mouseOffset[0])
+      const noteXPos = content[noteData.barIndex].noteStartPositions[noteData.noteIndex]
 
-    setUnplacedNotePosition(noteTopPos)
-  }, [yMouseOffset])
+      setUnplacedNotePosition([noteXPos, noteYPos])
+    }
+  }, [mouseOffset])
 
-  const logSection = (x, y) => {
+  const intendedNoteDataByMouseX = (x: number) : { barIndex: number , noteIndex: number, noteWidth: number }  => {
     x *= SVG_SCALE
-    y *= SVG_SCALE
     
     const barIndex = x < firstBarLinePosAfterScale ? 0 : 1
     const notes = content[barIndex].notes
     let accumulatedContentWidth: number = 0
+    let noteStartPos: number;
+    let noteIndex: number;
+    let noteWidth: number;
 
-    for (let i = 0; i < notes.length; i++) {
-      let currentNoteWidth = utils.getNoteWidthInPx(notes[i], content[barIndex].barWidth)
-      let currentNoteStartPos = content[barIndex].barStart + accumulatedContentWidth
+    for(let i = 0; i < content[barIndex].noteStartPositions.length; i++) {
+      const startPos = content[barIndex].noteStartPositions[i]
+      const prevStartPos = content[barIndex].noteStartPositions[i - 1]
 
-      if (currentNoteStartPos < x && x < currentNoteStartPos + currentNoteWidth + BAR_X_PADDING) { // compare to x
-        console.log(`
-          Bar index: ${barIndex}
-          Note position: ${currentNoteStartPos}
-          Note width: ${currentNoteWidth}
-        `)
-        break;
+      if (x < startPos) {
+        if (i === 0) {
+          noteStartPos = startPos
+          noteIndex = i
+          noteWidth = utils.getNoteWidthInPx(notes[noteIndex], content[barIndex].barWidth)
+          break
+        }
+
+        noteStartPos = prevStartPos
+        noteIndex = i - 1
+        noteWidth = utils.getNoteWidthInPx(notes[noteIndex], content[barIndex].barWidth)
+        break
       }
 
-      // if no match, add to `accumulatedContentWidth`
-      accumulatedContentWidth += currentNoteWidth
+      // If the script exits here, this must be the last note
+      noteStartPos = startPos
+      noteIndex = i
+      noteWidth = utils.getNoteWidthInPx(notes[noteIndex], content[barIndex].barWidth)
     }
+
+    return { barIndex, noteIndex, noteWidth }
   }
 
   const outputBar = (barIndex) => {
@@ -133,14 +183,14 @@ const UnstyledStaff = (StaffProps) => {
 
   return (
     <div className={`music ${StaffProps.className}`}>
-      {unplacedNotePosition && false && 
+      {unplacedNotePosition && unplacedNotePosition[1] &&
         <Note
           colorState="unplaced"
           ghostNote={StaffProps.toolbarState.noteType === "ghost note"}
           SVG={NoteSVGs[utils.optionsToSVGNoteCtName(StaffProps.toolbarState)]}
           scale={SVG_SCALE}
-          x={170}
-          y={unplacedNotePosition}
+          x={unplacedNotePosition[0]}
+          y={unplacedNotePosition[1]}
         />
       }
 
