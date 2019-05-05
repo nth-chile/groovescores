@@ -13,13 +13,29 @@ const SVG_HEIGHT_TIMES_SCALE = SVG_HEIGHT * SVG_SCALE
 const BAR_X_PADDING = 19 // Note section borders will stay this far from the edge of a bar
 const CLEF_AND_TIME_SIG_WIDTH = 70 // Offset for the beginning edge of first note section
 
+
+interface IBarObj {
+  barStart: number;
+  barWidth: number;
+  notes: Array<string>;
+  noteStartPositions: Array<number>;
+}
+
+type TContent = [IBarObj, IBarObj]
+
 // Initial content of staff
-const INITIAL_CONTENT = [
+let INITIAL_CONTENT: TContent = [
   {
-    notes: ["[z]4"]
+    barStart: CLEF_AND_TIME_SIG_WIDTH + BAR_X_PADDING,
+    barWidth: undefined,
+    notes: ["[z]4"],
+    noteStartPositions: [],
   },
   {
-    notes: ["[f]4"]
+    barStart: undefined,
+    barWidth: undefined,
+    notes: ["[f]4"],
+    noteStartPositions: [],
   }
 ]
 
@@ -30,7 +46,6 @@ interface StaffProps {
 }
 
 const UnstyledStaff = (StaffProps) => {
-  const [content, setContent] = useState(INITIAL_CONTENT)
   const [yMouseOffset, setYMouseOffset] = useState(null)
   const [unplacedNotePosition, setUnplacedNotePosition] = useState(null)
  
@@ -46,15 +61,10 @@ const UnstyledStaff = (StaffProps) => {
     setYMouseOffset(e.offsetY)
   }, 25, {leading: true, trailing: false}), [])
 
-  const writeableBarStartPositions: Array<number> = [
-    CLEF_AND_TIME_SIG_WIDTH + BAR_X_PADDING,
-    firstBarLinePosAfterScale + BAR_X_PADDING
-  ]
-
-  const writableBarWidths: Array<number> = [
-    firstBarLinePosAfterScale - writeableBarStartPositions[0] - BAR_X_PADDING,
-    staffLineWidthAfterScale - firstBarLinePosAfterScale - (BAR_X_PADDING * 2)
-  ]
+  INITIAL_CONTENT[1].barStart = firstBarLinePosAfterScale + BAR_X_PADDING
+  INITIAL_CONTENT[0].barWidth = firstBarLinePosAfterScale - INITIAL_CONTENT[0].barStart - BAR_X_PADDING
+  INITIAL_CONTENT[1].barWidth = staffLineWidthAfterScale - firstBarLinePosAfterScale - (BAR_X_PADDING * 2)
+  const [content, setContent] = useState<TContent>(INITIAL_CONTENT)
 
   // Assign event listeners
   useEffect(() => {
@@ -87,8 +97,8 @@ const UnstyledStaff = (StaffProps) => {
     let accumulatedContentWidth: number = 0
 
     for (let i = 0; i < notes.length; i++) {
-      let currentNoteWidth = utils.getNoteWidthInPx(notes[i], writableBarWidths[barIndex])
-      let currentNoteStartPos = writeableBarStartPositions[barIndex] + accumulatedContentWidth
+      let currentNoteWidth = utils.getNoteWidthInPx(notes[i], content[barIndex].barWidth)
+      let currentNoteStartPos = content[barIndex].barStart + accumulatedContentWidth
 
       if (currentNoteStartPos < x && x < currentNoteStartPos + currentNoteWidth + BAR_X_PADDING) { // compare to x
         console.log(`
@@ -105,16 +115,16 @@ const UnstyledStaff = (StaffProps) => {
   }
 
   const outputBar = (barIndex) => {
-    let notePos = writeableBarStartPositions[barIndex]
+    let notePos = content[barIndex].barStart
 
     return content[barIndex].notes.map((note, i) => {
-      const currentNoteWidth = utils.getNoteWidthInPx(note, writableBarWidths[barIndex])
+      const currentNoteWidth = utils.getNoteWidthInPx(note, content[barIndex].barWidth)
       let currentNoteStartPos = notePos
       notePos += currentNoteWidth
 
       // Exception: if only one note, center it
       if (content[barIndex].notes.length === 1) {
-        currentNoteStartPos = writeableBarStartPositions[barIndex] + (writableBarWidths[barIndex] / 2) - 5
+        currentNoteStartPos = content[barIndex].barStart + (content[barIndex].barWidth / 2) - 5
       }
 
       return <AbcToSVGNote  abc={note} key={i} SVGScale={SVG_SCALE} x={currentNoteStartPos} />
