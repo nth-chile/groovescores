@@ -1,5 +1,3 @@
-//import console = require("console");
-
 /*
   Utility functions that will probably only be used for the groove composer
 */
@@ -63,11 +61,22 @@ const ESelectionTop = getAverage(FMiddle, EMiddle) + 1
 const DSelectionTop = getAverage(EMiddle, DMiddle)
 const DSelectionBottom = DBottom
 
-// Takes array of sections (e.x., ["[z]2", "[z]2"]) and index, returns fraction(string) representing duration of section
-export const getSectionLengthAsFraction = (sections: Array<string>, sectionIndex: number) : string => {
+// Takes abcNote (e.x., "[z]2"), returns fraction (string) representing duration of note
+export const getNoteLengthAsFraction = (abcNote: string) : string => {
   const regex = /(?!])(\d+)(?:\/)*(\d+)*/
-  const matchArray = sections[sectionIndex].match(regex)
+  const matchArray = abcNote.match(regex)
   return `${matchArray[1]}/${matchArray[2] || 1}`
+}
+
+export const getNoteWidthInPx = (abcNote: string, barWidth: number) => {
+  // extract fraction
+  const fraction = getNoteLengthAsFraction(abcNote)
+  // convert to percentage               
+  const split = fraction.split("/")                                       
+  const float = parseFloat(split[0]) / parseFloat(split[1])
+  const percentage = float / 4 * 100
+  // convert that to pixels
+  return percentage * barWidth / 100
 }
 
 // Returns abc notation for a note based on cursor's y-position on the staff. Used for displaying unplaced notes
@@ -101,27 +110,28 @@ export const noteTopPosByAbcNote = {
   "G": GTop, 
   "F": FTop, 
   "E": ETop, 
-  "^D": DTop
-};
+  "^D": DTop,
+  "z": 0
+}
 
-export const optionsToNoteSVG = (options) => {
+export const optionsToSVGNoteCtName = (options: { noteLength: string, noteType: string }) : string => {
   let typeString;
 
   if (options.noteType === "note") typeString = "Note";
   if (options.noteType === "rest") typeString = "Rest";
 
   switch (true) {
-    case options.noteLength === "1":
+    case options.noteLength === "4" || options.noteLength === "4/1":
       return `Whole${typeString}`
-    case options.noteLength === "1/2":
+    case options.noteLength === "2" || options.noteLength === "2/1":
       return `Half${typeString}`
-    case options.noteLength === "1/4":
+    case options.noteLength === "1" || options.noteLength === "1/1":
       return `Quarter${typeString}`
-    case options.noteLength === "1/8":
+    case options.noteLength === "1/2":
       return `Eighth${typeString}`
-    case options.noteLength === "1/16":
+    case options.noteLength === "1/4":
       return `Sixteenth${typeString}`
-    case options.noteLength === "1/32":
+    case options.noteLength === "1/8":
       return `Thirtysecond${typeString}`
   }
 }

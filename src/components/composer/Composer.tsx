@@ -16,14 +16,26 @@ interface ComposerProps {
 
 const UnstyledComposer = (ComposerProps) => {
   const [noteType, setNoteType] = useState("note")
-  const [noteLength, setNoteLength] = useState("1/4")
+  const [noteLength, setNoteLength] = useState("1")
 
   const container = useRef(null)
   const xPadding = 66; // The x-padding of .groove
 
-  useEffect(() => {
-    console.log(noteType, noteLength)
-  }, [noteType, noteLength])
+  // Converts display fraction into value fraction. A quarter note, written as "1/4", is "1/1" for the application/. Since "1/4" is our default length, "1/1" refers to "1 times the default note, or 1/4".
+  const handleSetNoteLength = (noteLength) => {
+    let result: string;
+
+    switch (noteLength) {
+      case "1": result = "4"; break
+      case "1/2": result = "2"; break
+      case "1/4": result = "1"; break
+      case "1/8": result = "1/2"; break
+      case "1/16": result = "1/4"; break
+      case "1/32":result = "1/8"; break
+    }
+
+    setNoteLength(result);
+  }
 
   const resizeHandler = useCallback(throttle(() => {
     setContainerWidth(container.current.clientWidth)
@@ -50,7 +62,7 @@ const UnstyledComposer = (ComposerProps) => {
         <div className="content">
           <Toolbar
             setNoteType={setNoteType}
-            setNoteLength={setNoteLength}
+            setNoteLength={handleSetNoteLength}
           />
 
           <div className="groove" ref={container}>

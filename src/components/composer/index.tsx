@@ -1,3 +1,4 @@
+export * from "./AbcToSvgNote";
 export * from "./Composer";
 export * from "./Note";
 export * from "./Toolbar";

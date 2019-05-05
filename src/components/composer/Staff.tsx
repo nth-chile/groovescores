@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState, useRef } from "react"
 import styled from "styled-components"
 import throttle from "lodash/throttle"
-import { Note } from "."
+import { AbcToSVGNote, Note } from "."
 import * as NoteSVGs from "./noteSVGs"
 import * as utils from "../../utils"
 
@@ -10,16 +10,16 @@ const SVG_WIDTH = 400
 const SVG_SCALE = 1.975
 const SVG_WIDTH_TIMES_SCALE = SVG_WIDTH * SVG_SCALE
 const SVG_HEIGHT_TIMES_SCALE = SVG_HEIGHT * SVG_SCALE
-const BAR_X_PADDING = 10 // Note section borders will stay this far from the edge of a bar
+const BAR_X_PADDING = 19 // Note section borders will stay this far from the edge of a bar
 const CLEF_AND_TIME_SIG_WIDTH = 70 // Offset for the beginning edge of first note section
 
 // Initial content of staff
 const INITIAL_CONTENT = [
   {
-    sections: ["[z]2", "[z]2"]
+    notes: ["[z]4"]
   },
   {
-    sections: ["[z]4"]
+    notes: ["[f]4"]
   }
 ]
 
@@ -33,14 +33,29 @@ const UnstyledStaff = (StaffProps) => {
   const [content, setContent] = useState(INITIAL_CONTENT)
   const [yMouseOffset, setYMouseOffset] = useState(null)
   const [unplacedNotePosition, setUnplacedNotePosition] = useState(null)
-
+ 
   const staffLineWidthBeforeScale = SVG_WIDTH < StaffProps.maxWidth - (SVG_WIDTH_TIMES_SCALE - SVG_WIDTH) ? SVG_WIDTH - 1.5 : SVG_WIDTH * StaffProps.maxWidth / SVG_WIDTH_TIMES_SCALE - 1.5
+  const staffLineWidthAfterScale = staffLineWidthBeforeScale * SVG_SCALE
+
   const firstBarLinePosBeforeScale = 205.8 / 398.5 * staffLineWidthBeforeScale
+  const firstBarLinePosAfterScale = firstBarLinePosBeforeScale * SVG_SCALE
+
   const svgRef = useRef(null)
+
   const mousemoveHandler = useCallback(throttle((e) => {
     setYMouseOffset(e.offsetY)
   }, 25, {leading: true, trailing: false}), [])
-  
+
+  const writeableBarStartPositions: Array<number> = [
+    CLEF_AND_TIME_SIG_WIDTH + BAR_X_PADDING,
+    firstBarLinePosAfterScale + BAR_X_PADDING
+  ]
+
+  const writableBarWidths: Array<number> = [
+    firstBarLinePosAfterScale - writeableBarStartPositions[0] - BAR_X_PADDING,
+    staffLineWidthAfterScale - firstBarLinePosAfterScale - (BAR_X_PADDING * 2)
+  ]
+
   // Assign event listeners
   useEffect(() => {
     if (svgRef !== null) {
@@ -66,66 +81,62 @@ const UnstyledStaff = (StaffProps) => {
   const logSection = (x, y) => {
     x *= SVG_SCALE
     y *= SVG_SCALE
+    
+    const barIndex = x < firstBarLinePosAfterScale ? 0 : 1
+    const notes = content[barIndex].notes
+    let accumulatedContentWidth: number = 0
 
-    const firstBarLinePos = 205.8 / 398.5 * staffLineWidthBeforeScale * SVG_SCALE
+    for (let i = 0; i < notes.length; i++) {
+      let currentNoteWidth = utils.getNoteWidthInPx(notes[i], writableBarWidths[barIndex])
+      let currentNoteStartPos = writeableBarStartPositions[barIndex] + accumulatedContentWidth
 
-    const barIndex = x < firstBarLinePos ? 0 : 1
-    const barSections = content[barIndex].sections
-    let writeableBarStartPos: number
-    let writableBarWidth: number
-    let accumulatedSectionWidth: number = 0
-  
-    // Determine writeableBarStartPos and writableBarWidth
-    if (barIndex === 0) {
-      writeableBarStartPos = CLEF_AND_TIME_SIG_WIDTH + BAR_X_PADDING
-      writableBarWidth = firstBarLinePos - writeableBarStartPos - BAR_X_PADDING
-    } else {
-      writeableBarStartPos = firstBarLinePos + BAR_X_PADDING
-      writableBarWidth = (staffLineWidthBeforeScale * SVG_SCALE) - firstBarLinePos - (BAR_X_PADDING * 2)
-    }
-
-    for (let i = 0; i < barSections.length; i++) {              // Iterate through sections
-      let fraction = utils.getSectionLengthAsFraction(barSections, i) // extract fraction
-      let split = fraction.split("/")
-      let float = parseFloat(split[0]) / parseFloat(split[1])
-      let percentage = float / 4 * 100                          // convert to percentage
-      let writeableCurrentSectionWidth = percentage * writableBarWidth / 100     // convert that to pixels
-      let writeableSectionStartPos = writeableBarStartPos + accumulatedSectionWidth
-      let writeableSectionEndPos = writeableBarStartPos + accumulatedSectionWidth + writeableCurrentSectionWidth
-
-      if (writeableSectionStartPos < x && x < writeableSectionEndPos + BAR_X_PADDING) { // compare to x
+      if (currentNoteStartPos < x && x < currentNoteStartPos + currentNoteWidth + BAR_X_PADDING) { // compare to x
         console.log(`
-          Bar Index: ${barIndex}
-          Section Index: ${i}
-          Y: ${y}
-          Note: ${utils.intendedNoteByMouseY(y)}
-          Section Length: ${fraction}
-          Selector x position from SVG left: ${x}
-          Writeable section Start position: ${writeableSectionStartPos}
-          Writeable section End Position: ${writeableSectionEndPos}
-          Writeable section Width: ${writeableCurrentSectionWidth}
+          Bar index: ${barIndex}
+          Note position: ${currentNoteStartPos}
+          Note width: ${currentNoteWidth}
         `)
-  
         break;
       }
 
-      // if no match, add to `accumulatedSectionWidth`
-      accumulatedSectionWidth += writeableCurrentSectionWidth
+      // if no match, add to `accumulatedContentWidth`
+      accumulatedContentWidth += currentNoteWidth
     }
+  }
+
+  const outputBar = (barIndex) => {
+    let notePos = writeableBarStartPositions[barIndex]
+
+    return content[barIndex].notes.map((note, i) => {
+      const currentNoteWidth = utils.getNoteWidthInPx(note, writableBarWidths[barIndex])
+      let currentNoteStartPos = notePos
+      notePos += currentNoteWidth
+
+      // Exception: if only one note, center it
+      if (content[barIndex].notes.length === 1) {
+        currentNoteStartPos = writeableBarStartPositions[barIndex] + (writableBarWidths[barIndex] / 2) - 5
+      }
+
+      return <AbcToSVGNote  abc={note} key={i} SVGScale={SVG_SCALE} x={currentNoteStartPos} />
+    })
   }
 
   return (
     <div className={`music ${StaffProps.className}`}>
-      {unplacedNotePosition &&
+      {unplacedNotePosition && false && 
         <Note
           colorState="unplaced"
           ghostNote={StaffProps.toolbarState.noteType === "ghost note"}
-          SVG={NoteSVGs[utils.optionsToNoteSVG(StaffProps.toolbarState)]}
+          SVG={NoteSVGs[utils.optionsToSVGNoteCtName(StaffProps.toolbarState)]}
           scale={SVG_SCALE}
           x={170}
           y={unplacedNotePosition}
         />
       }
+
+      {/* Place the notes */}
+      {outputBar(0)}
+      {outputBar(1)}
 
       <svg
         xmlns="http://www.w3.org/2000/svg"

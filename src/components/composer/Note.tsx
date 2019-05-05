@@ -26,7 +26,7 @@ const colorStateToHex = {
   hovered: styles.colors.blue,
 }
 
-const Note = styled(UnstyledNote)`
+const Note = styled(UnstyledNote)<NoteProps>`
   color: ${NoteProps => colorStateToHex[NoteProps.colorState]};
   position: absolute;
   left: ${NoteProps => NoteProps.x}px;
