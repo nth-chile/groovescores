@@ -61,6 +61,26 @@ const ESelectionTop = getAverage(FMiddle, EMiddle) + 1
 const DSelectionTop = getAverage(EMiddle, DMiddle)
 const DSelectionBottom = DBottom
 
+export const floatToFraction = (float: number) => {
+  switch (float) {
+    case .125: return "1/8"
+    case .25: return "1/4"
+    case .5: return "1/2"
+    case 1: return "1"
+    case 2: return "2"
+    case 4: return "4"
+  }
+}
+
+// Takes abcNote, and evaluates the fraction returned by getNoteLengthAsFraction
+export const getNoteLengthAsFloat = (abcNote: string) => {
+  // extract fraction
+  const fraction = getNoteLengthAsFraction(abcNote)
+  // convert to float
+  const split = fraction.split("/")                                       
+  return parseFloat(split[0]) / parseFloat(split[1])
+}
+
 // Takes abcNote (e.x., "[z]2"), returns fraction (string) representing duration of note
 export const getNoteLengthAsFraction = (abcNote: string) : string => {
   const regex = /(?!])(\d+)(?:\/)*(\d+)*/
@@ -68,12 +88,8 @@ export const getNoteLengthAsFraction = (abcNote: string) : string => {
   return `${matchArray[1]}/${matchArray[2] || 1}`
 }
 
-export const getNoteWidthInPx = (abcNote: string, barWidth: number) => {
-  // extract fraction
-  const fraction = getNoteLengthAsFraction(abcNote)
-  // convert to percentage               
-  const split = fraction.split("/")                                       
-  const float = parseFloat(split[0]) / parseFloat(split[1])
+export const getNoteWidthInPx = (abcNote: string, barWidth: number) => {                                      
+  const float = getNoteLengthAsFloat(abcNote)
   const percentage = float / 4 * 100
   // convert that to pixels
   return percentage * barWidth / 100
@@ -100,8 +116,8 @@ export const intendedNoteByMouseY = (y: number) : string | false => {
 
 export const noteTopPosByAbcNote = {
   "^A'": aTop, 
-  "^g": gTop, 
-  "f": fTop, 
+  "^g": gTop,
+  "f": fTop,
   "e": eTop, 
   "d": dTop, 
   "c": cTop, 
