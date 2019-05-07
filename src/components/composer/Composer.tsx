@@ -15,6 +15,7 @@ interface ComposerProps {
 }
 
 const UnstyledComposer = (ComposerProps) => {
+  const [meter, setMeter] = useState("4/4")
   const [noteType, setNoteType] = useState("note")
   const [noteLength, setNoteLength] = useState("1")
 
@@ -61,6 +62,7 @@ const UnstyledComposer = (ComposerProps) => {
       <div className={ComposerProps.className}>
         <div className="content">
           <Toolbar
+            setMeter={setMeter}
             setNoteType={setNoteType}
             setNoteLength={handleSetNoteLength}
           />
@@ -71,7 +73,7 @@ const UnstyledComposer = (ComposerProps) => {
               containerWidth &&
               <Staff
                 maxWidth={containerWidth - xPadding}
-                toolbarState={{ noteLength, noteType }}  
+                toolbarState={{ meter, noteLength, noteType }}  
               />
             }
             <div>

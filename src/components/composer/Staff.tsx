@@ -298,6 +298,15 @@ const UnstyledStaff = (StaffProps) => {
         />
       }
 
+      {/* Time signature */}
+      <Note
+        colorState="normal"
+        SVG={NoteSVGs[utils.timeSignatureStringToSVGCtName[StaffProps.toolbarState.meter]]}
+        scale={SVG_SCALE}
+        x={51}
+        y={0}
+      />
+
       {/* Place the notes */}
       {outputBar(0)}
       {outputBar(1)}
@@ -324,10 +333,6 @@ const UnstyledStaff = (StaffProps) => {
         <path className="bW" d={`M${staffLineWidthBeforeScale},50.0 v-24.0`}></path>
         <path className="bW" d={`M${firstBarLinePosBeforeScale},50.0 v-24.0`}></path>
         <text x="6.5" y="38.0"></text>
-        <g transform="translate(30.5,44.0)" textAnchor="middle">
-        <text y="-12"></text>
-        <text></text>
-        </g>
       </svg>
     </div>
   )

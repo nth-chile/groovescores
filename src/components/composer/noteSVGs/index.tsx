@@ -10,3 +10,8 @@ export * from "./ThirtysecondNote";
 export * from "./ThirtysecondRest";
 export * from "./WholeNote";
 export * from "./WholeRest";
+
+export * from "./FourFour";
+export * from "./SixEight";
+export * from "./ThreeFour";
+export * from "./TwoFour";

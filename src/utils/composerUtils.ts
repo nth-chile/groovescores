@@ -130,6 +130,13 @@ export const noteTopPosByAbcNote = {
   "z": 0
 }
 
+export const timeSignatureStringToSVGCtName = {
+  "2/4": "TwoFour",
+  "3/4": "ThreeFour",
+  "4/4": "FourFour",
+  "6/8": "SixEight"
+}
+
 export const optionsToSVGNoteCtName = (options: { noteLength: string, noteType: string }) : string => {
   let typeString;
 

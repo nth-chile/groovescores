@@ -5,6 +5,7 @@ import { ToolbarSelect } from "."
 
 interface ToolbarProps {
   className?: string;
+  setMeter: object;
   setNoteLength: object;
   setNoteType: object;
 }
@@ -12,6 +13,11 @@ interface ToolbarProps {
 const UnstyledToolbar = (ToolbarProps) => {
   return (
     <div className={ToolbarProps.className}>
+      <ToolbarSelect
+        initialValue={"4/4"}
+        options={["4/4", "2/4", "3/4", "6/8"]}
+        handleSelect={ToolbarProps.setMeter}
+      />
       <ToolbarSelect
         initialValue={"Note"}
         options={["Note", "Rest", "Ghost Note"]}
