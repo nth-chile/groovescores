@@ -5,11 +5,15 @@ import * as styles from "../commonStyles"
 interface Props {
   text: string;
   className: string;
+  onClick?: object;
 }
 
 const UnstyledButton = (Props) => {
     return (
-      <button className={Props.className}>
+      <button
+        className={Props.className}
+        onClick={Props.onClick}
+      >
         {Props.text}
       </button>
     )

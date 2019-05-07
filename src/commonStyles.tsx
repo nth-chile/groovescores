@@ -1,5 +1,7 @@
 import { css } from "styled-components"
 
+export const borderRadius = css`border-radius: 3px;`
+
 export const colors = {
   black: "#2f2f2f",
   blue: "#00a6fb",

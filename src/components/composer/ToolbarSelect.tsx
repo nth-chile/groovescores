@@ -14,6 +14,12 @@ const UnstyledToolbarSelect = (ToolbarSelectProps) => {
   const [selectedValue, setSelectedValue] = useState(ToolbarSelectProps.initialValue)
   const [isClosed, toggleClosed] = useState(true)
 
+  const handleClick = (option) => {
+    setSelectedValue(option)
+    toggleClosed(!isClosed)
+    ToolbarSelectProps.handleSelect(option.toLowerCase())
+  }
+
   return (
     <div className={ToolbarSelectProps.className}>
       <svg className="dropdownArrow" xmlns="http://www.w3.org/2000/svg" width="11" height="6">
@@ -30,11 +36,7 @@ const UnstyledToolbarSelect = (ToolbarSelectProps) => {
           ToolbarSelectProps.options.map(option =>
             <li
               key={option}
-              onClick={() => {
-                setSelectedValue(option)
-                toggleClosed(!isClosed)
-                ToolbarSelectProps.handleSelect(option.toLowerCase())
-              }}
+              onClick={(e) => handleClick(option)}
             >
               {option}
             </li>

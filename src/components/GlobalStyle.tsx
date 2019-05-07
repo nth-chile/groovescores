@@ -15,6 +15,11 @@ const GlobalStyle = createGlobalStyle`
     font-weight: 600;
     margin: 0;
   }
+
+  #modal-root {
+    display: flex;
+    justify-content: center;
+  }
 }
 `
 

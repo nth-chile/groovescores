@@ -73,12 +73,21 @@ export const floatToFraction = (float: number) => {
 }
 
 // Takes abcNote, and evaluates the fraction returned by getNoteLengthAsFraction
-export const getNoteLengthAsFloat = (abcNote: string) => {
+export const getNoteLengthAsFloat = (abcNote: string, meter: string = "4/4") => {
   // extract fraction
   const fraction = getNoteLengthAsFraction(abcNote)
   // convert to float
   const split = fraction.split("/")                                       
-  return parseFloat(split[0]) / parseFloat(split[1])
+  const float = parseFloat(split[0]) / parseFloat(split[1])
+
+  if (float !== 4) return float
+
+  switch (meter) {
+    case "4/4": return 4
+    case "2/4": return 2
+    case "3/4": return 3
+    case "6/8": return 3
+  }
 }
 
 // Takes abcNote (e.x., "[z]2"), returns fraction (string) representing duration of note
