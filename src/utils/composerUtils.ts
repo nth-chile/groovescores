@@ -72,6 +72,29 @@ export const floatToFraction = (float: number) => {
   }
 }
 
+// "Balanced": a compromise between distributing notes evenly on a staff and distributing based on note duration. Solves the problem of 1/32 notes being too close together
+export const getBalancedNoteWidthInPx = (abcNotes: Array<string>, index: number, barWidth: number) => {
+  const INTENSITY = .05
+  const augmentedFloats = []
+  let augmentedTotal = 0
+  const balancedPxWidths = []
+  const noteFloats = abcNotes.map(item => getNoteLengthAsFloat(item))
+
+  
+  for(let i = 0; i < noteFloats.length; i++) {
+    const augmentedFloat = 100 / noteFloats.length + noteFloats[i] / INTENSITY
+    augmentedFloats.push(augmentedFloat)
+    augmentedTotal += augmentedFloat
+  }
+
+  for(let i = 0; i < noteFloats.length; i++) {
+    const balancedFloat = augmentedFloats[i] / augmentedTotal * 100
+    balancedPxWidths.push(balancedFloat * barWidth / 100)
+  }
+  
+  return balancedPxWidths[index]
+}
+
 // Takes abcNote, and evaluates the fraction returned by getNoteLengthAsFraction
 export const getNoteLengthAsFloat = (abcNote: string, meter: string = "4/4") => {
   // extract fraction

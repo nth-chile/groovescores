@@ -83,8 +83,7 @@ const UnstyledStaff = (StaffProps) => {
 
       // Get and push note start positions to newNoteStartPositions
       for(let j = 0; j < content[i].notes.length; j++) {
-        const note = content[i].notes[j]
-        const currentNoteWidth = utils.getNoteWidthInPx(note, content[i].barWidth)
+        const currentNoteWidth = utils.getBalancedNoteWidthInPx(content[i].notes, j, content[i].barWidth)
         let currentNoteStartPos = notePos
         notePos += currentNoteWidth
 
@@ -208,10 +207,37 @@ const UnstyledStaff = (StaffProps) => {
         }
       }
 
+      //  Split accumulatedRemovedNotesLength into note + rest as remainder
+      let noteLength: number;
+
+      switch (true) {
+        case accumulatedRemovedNotesLength > 4:
+          noteLength = 4
+          break;
+        case accumulatedRemovedNotesLength > 2:
+          noteLength = 2
+          break;
+        case accumulatedRemovedNotesLength > 1:
+          noteLength = 1
+          break;
+        case accumulatedRemovedNotesLength > .5:
+          noteLength = .5
+          break;
+        case accumulatedRemovedNotesLength > .25:
+          noteLength = .25
+          break;
+        case accumulatedRemovedNotesLength > .125:
+          noteLength = .125
+      }
+
+      const restLength = accumulatedRemovedNotesLength - noteLength;
+
       // Finally, add the unplacedNote
-      const unplacedAbc = `[${utils.intendedNoteByMouseY(mouseOffset[1] * SVG_SCALE)}]${utils.floatToFraction(accumulatedRemovedNotesLength)}`
-      newContent[barIndex].notes.splice(clickedNoteIndex, 0, unplacedAbc)
-      console.log(JSON.stringify(newContent[barIndex].notes))
+      const unplacedNote = `[${utils.intendedNoteByMouseY(mouseOffset[1] * SVG_SCALE)}]${utils.floatToFraction(noteLength)}`
+      const unplacedRest = `[z]${utils.floatToFraction(restLength)}`
+
+      console.log(accumulatedRemovedNotesLength,restLength,noteLength, unplacedNote, unplacedRest)
+      newContent[barIndex].notes.splice(clickedNoteIndex, 0, unplacedNote, unplacedRest)
     }
 
     setContent(newContent)
@@ -259,20 +285,20 @@ const UnstyledStaff = (StaffProps) => {
         if (i === 0) {
           noteStartPos = startPos
           noteIndex = i
-          noteWidth = utils.getNoteWidthInPx(notes[noteIndex], content[barIndex].barWidth)
+          noteWidth = utils.getBalancedNoteWidthInPx(notes, i, content[barIndex].barWidth)
           break
         }
 
         noteStartPos = prevStartPos
         noteIndex = i - 1
-        noteWidth = utils.getNoteWidthInPx(notes[noteIndex], content[barIndex].barWidth)
+        noteWidth = utils.getBalancedNoteWidthInPx(notes, i, content[barIndex].barWidth)
         break
       }
 
       // If the script exits here, this must be the last note
       noteStartPos = startPos
       noteIndex = i
-      noteWidth = utils.getNoteWidthInPx(notes[noteIndex], content[barIndex].barWidth)
+      noteWidth = utils.getBalancedNoteWidthInPx(notes, i, content[barIndex].barWidth)
     }
 
     return { barIndex, noteIndex, noteWidth }
@@ -281,8 +307,8 @@ const UnstyledStaff = (StaffProps) => {
   const outputBar = (barIndex) => {
     let notePos = content[barIndex].barStart
 
-    return content[barIndex].notes.map((note, i) => {
-      const currentNoteWidth = utils.getNoteWidthInPx(note, content[barIndex].barWidth)
+    return content[barIndex].notes.map((note, i, notes) => {
+      const currentNoteWidth = utils.getBalancedNoteWidthInPx(notes, i, content[barIndex].barWidth)
       let currentNoteStartPos = notePos
       notePos += currentNoteWidth
 

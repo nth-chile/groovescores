@@ -73,7 +73,7 @@ const UnstyledComposer = (ComposerProps) => {
               containerWidth &&
               <Staff
                 maxWidth={containerWidth - xPadding}
-                toolbarState={{ meter, noteLength, noteType }}  
+                toolbarState={{ meter, noteLength, noteType }}
               />
             }
             <div>
