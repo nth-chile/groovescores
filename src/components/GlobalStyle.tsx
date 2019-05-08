@@ -16,9 +16,8 @@ const GlobalStyle = createGlobalStyle`
     margin: 0;
   }
 
-  #modal-root {
-    display: flex;
-    justify-content: center;
+  .overflow-hidden {
+    overflow: hidden;
   }
 }
 `

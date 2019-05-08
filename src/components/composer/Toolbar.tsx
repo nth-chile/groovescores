@@ -16,7 +16,15 @@ const UnstyledToolbar = (ToolbarProps) => {
   const [didConfirmTimeSigSelect, setDidConfirmTimeSigSelect] = useState(false)
   const [selectedTimeSig, setSelectedTimeSig] = useState(null)
 
+  const bodyClasslist = document.querySelector('body').classList;
+
+  const handleCancelTimeSigSelect = () => {
+    bodyClasslist.remove('overflow-hidden')
+    setIsModalShown(false)
+  }
+
   const handleTimeSigSelect = (timeSig) => {
+    bodyClasslist.add('overflow-hidden')
     setIsModalShown(true)
     setSelectedTimeSig(timeSig)
   }
@@ -48,10 +56,10 @@ const UnstyledToolbar = (ToolbarProps) => {
 
       {
         isModalShown && (
-          <Modal className="modal">
-            <p>Changing the time signature will clear the staff content.</p>
+          <Modal>
+            <p>Changing the time signature will clear the staff content. Are you sure you want to do that?</p>
             <div className="controls">
-              <Button onClick={() => setIsModalShown(false)} text="Cancel" />
+              <Button onClick={handleCancelTimeSigSelect} text="Cancel" />
               <Button onClick={handleConfirmTimeSigSelect} text="Ok" />
             </div>
           </Modal>

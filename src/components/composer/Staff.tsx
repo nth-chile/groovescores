@@ -64,6 +64,14 @@ const UnstyledStaff = (StaffProps) => {
   INITIAL_CONTENT[1].barWidth = staffLineWidthAfterScale - firstBarLinePosAfterScale - (BAR_X_PADDING * 2)
   const [content, setContent] = useState<TContent>(INITIAL_CONTENT)
 
+  // Reset staff content when meter changes
+  useEffect(() => {
+    const newContent = [...content]
+    newContent[0].notes = ["[z]4"]
+    newContent[1].notes = ["[z]4"]
+    setContent(newContent)
+  }, [StaffProps.toolbarState.meter] )
+
   // Update content when content[x].notes changes
   useEffect(() => {
     // Shallow clone state

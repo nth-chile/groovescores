@@ -11,7 +11,9 @@ interface Props {
 const Unstyled = (Props) => (
   ReactDOM.createPortal(
     <div className={Props.className}>
-      {Props.children}
+      <div className="modal">
+        {Props.children}
+      </div>
     </div>,
     document.getElementById("modal-root")
   )
@@ -20,12 +22,25 @@ const Unstyled = (Props) => (
 export const Modal = styled(Unstyled)<Props>`
   ${styles.basic}
   ${styles.openSansSmall}
-  background: ${styles.colors.white};
-  ${styles.borderRadius}
-  ${styles.boxShadow}
-  padding: 19px;
-  position: fixed;
-  top: 12px;
+  display: flex;
+  justify-content: center;
+  position: absolute;
+  top: 0;
+  height: 100vh;
+  width: 100vw;
+  background: rgba(47, 47, 47, .5);
+
+  .modal {
+    background: ${styles.colors.white};
+    ${styles.borderRadius}
+    ${styles.boxShadow}
+    margin: 19px;
+    max-width: 30em;
+    transform: translateX(-9.5px);
+    padding: 19px;
+    position: fixed;
+    top: 19px;
+  }
 
   .controls {
     text-align: right;
