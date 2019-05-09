@@ -12,12 +12,19 @@ interface NoteProps {
   y: number;
 }
 
-const UnstyledNote = (NoteProps) =>
+const UnstyledNote = (NoteProps) => {
+  const includeLedger = NoteProps.y === 33.5
+  const symbolModifier = [33.5, 38.5, 44.5, 97.5].includes(NoteProps.y) ? "cymbal" : undefined
+
+  return(
   <NoteProps.SVG
       className={NoteProps.className}
       ghostNote={NoteProps.ghostNote || false}
+      includeLedger={includeLedger}
+      symbolModifier={symbolModifier}
       y={NoteProps.y} // Pass y coordinate to individual note, to make proper vertical position adjustments
-  />
+  />)
+}
 
 const colorStateToHex = {
   unplaced: styles.colors.grey,

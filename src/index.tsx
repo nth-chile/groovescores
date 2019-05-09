@@ -13,10 +13,10 @@ const App = () =>
         <GlobalStyle />
         <Composer />
 
-        {/* <Groove
+        <Groove
             timeSignature="2/4"
-            basicAbcDrumsNotation="[!(.!!).!a]"
-        /> */}
+            basicAbcDrumsNotation="[^D][^g][^A']"
+        />
     </React.Fragment>
 
 if (module && module.hot) {
