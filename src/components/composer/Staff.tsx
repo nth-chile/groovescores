@@ -114,6 +114,7 @@ const UnstyledStaff = (StaffProps) => {
   const clickHandler = (e) => {
     const { barIndex, noteIndex: clickedNoteIndex } = intendedNoteDataByMouseX(e.offsetX)
 
+    const ghostNoteModifier = toolbarState.noteType === "ghost note" ? "!(.!!).!" : "" 
     const clickedNoteLength = utils.getNoteLengthAsFloat(content[barIndex].notes[clickedNoteIndex], toolbarState.meter)
     const unplacedNoteLength = utils.getNoteLengthAsFloat(toolbarState.noteLength, toolbarState.meter)
     const newContent = [...content]
@@ -129,11 +130,9 @@ const UnstyledStaff = (StaffProps) => {
       note = "z"
     }
 
-    console.log(toolbarState.noteType)
-
     // Clicked note is exactly as long as unplaced note. Remove clickedNote, add unplacedNote
     if (clickedNoteLength - unplacedNoteLength === 0) {
-      const unplacedAbc = `[${note}]${toolbarState.noteLength}`
+      const unplacedAbc = `[${ghostNoteModifier}${note}]${toolbarState.noteLength}`
       newContent[barIndex].notes.splice(clickedNoteIndex, 1, unplacedAbc)
       setContent(newContent)
       return
@@ -213,7 +212,10 @@ const UnstyledStaff = (StaffProps) => {
           const note = newContent[barIndex].notes[clickedNoteIndex + nextNoteIndexOffset]
           const noteWithoutLength = note.split("]")[0] + "]"
           const noteWithNewLength = noteWithoutLength + lengthAsFraction
-          newContent[barIndex].notes.splice(clickedNoteIndex + nextNoteIndexOffset, 1, noteWithNewLength)
+
+          newContent[barIndex].notes.splice(clickedNoteIndex + nextNoteIndexOffset, 1, `${ghostNoteModifier}${noteWithNewLength}`)
+          accumulatedRemovedNotesLength += unplacedNoteLength - clickedNoteLength
+          nextNoteIndexOffset++
         }
       }
 
@@ -240,23 +242,20 @@ const UnstyledStaff = (StaffProps) => {
           noteLength = .125
       }
 
-      const restLength = accumulatedRemovedNotesLength - noteLength;
-
       // Finally, add the unplacedNote
-      const unplacedNote = `[${note}]${utils.floatToFraction(noteLength)}`
-
-      console.log(`
-      restLength: ${restLength}
-      noteLength: ${noteLength}
-      unplacedNote: ${unplacedNote}
-      `)
-
+      const unplacedNote = `[${ghostNoteModifier}${note}]${utils.floatToFraction(noteLength)}`
       newContent[barIndex].notes.splice(clickedNoteIndex, 0, unplacedNote)
 
       // And any remainder as rest
+      const restLength = accumulatedRemovedNotesLength - noteLength;
+
       if (restLength > 0) {
-        const unplacedRest = `[z]${utils.floatToFraction(restLength)}`
-        newContent[barIndex].notes.splice(clickedNoteIndex + 1, 0, unplacedRest)
+        const restLengths = utils.splitFloatTotalIntoNoteFloats(restLength)
+
+        for (let i = 0; i < restLengths.length; i++) {
+          const unplacedRest = `[${ghostNoteModifier}z]${utils.floatToFraction(restLengths[i])}`
+          newContent[barIndex].notes.splice(clickedNoteIndex + i + 1, 0, unplacedRest)
+        }
       }
     }
 

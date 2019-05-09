@@ -69,6 +69,7 @@ export const floatToFraction = (float: number) => {
     case 1: return "1/1"
     case 2: return "2/1"
     case 4: return "4/1"
+    default: return undefined
   }
 }
 
@@ -115,7 +116,6 @@ export const getNoteLengthAsFloat = (abcNote: string, meter: string = "4/4") => 
 
 // Takes abcNote (e.x., "[z]2"), returns fraction (string) representing duration of note
 export const getNoteLengthAsFraction = (abcNote: string) : string => {
-  console.log(abcNote)
   const regex = /(?!])(\d+)(?:\/)*(\d+)*/
   const matchArray = abcNote.match(regex)
   return `${matchArray[1]}/${matchArray[2] || 1}`
@@ -172,7 +172,7 @@ export const timeSignatureStringToSVGCtName = {
 export const optionsToSVGNoteCtName = (options: { noteLength: string, noteType: string }) : string => {
   let typeString;
 
-  if (options.noteType === "note") typeString = "Note";
+  if (options.noteType === "note" || options.noteType === "ghost note") typeString = "Note";
   if (options.noteType === "rest") typeString = "Rest";
 
   switch (true) {
@@ -189,4 +189,24 @@ export const optionsToSVGNoteCtName = (options: { noteLength: string, noteType: 
     case options.noteLength === "1/8":
       return `Thirtysecond${typeString}`
   }
+}
+
+export const splitFloatTotalIntoNoteFloats = (total: number, iterations = 0): Array<number> => {
+  if (floatToFraction(total) === undefined) {
+    return splitFloatTotalIntoNoteFloats(total - .125, iterations + 1)
+  }
+  
+  let arr = Array(iterations).fill(.125)
+  
+  if (iterations === 7) {
+    arr = [.5, .25, .125]
+  } else if (iterations === 5) {
+    arr = [.5, .125]
+  } else if (iterations === 3) {
+    arr = [.25, .125]
+  }
+  
+  arr.unshift(total)
+  
+  return arr
 }

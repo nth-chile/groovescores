@@ -20,7 +20,11 @@ const Unstyled = (Props) => {
   const noteLength = utils.getNoteLengthAsFraction(Props.abc)
   const note = Props.abc.match(/(?!\[)(\w|\^|\')+/)[0]
   const y = utils.noteTopPosByAbcNote[note]
-  let noteType = "note";
+  let noteType = "note"
+
+  if (Props.abc.match(/!\(.!!\).!/)) {
+    noteType = "ghost note"
+  }
 
   if (Props.abc[1] === "z") {
     noteType = "rest"
