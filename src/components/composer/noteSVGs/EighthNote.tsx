@@ -24,8 +24,8 @@ const EighthNote = (NoteProps) =>
     {
       NoteProps.ghostNote &&
       <>
-        <text x="-2" y="25" className="dacs" textAnchor="middle">(</text>
-        <text x="11" y="25" className="dacs" textAnchor="middle">)</text>
+        <text x="-3" y="41" className="dacs" textAnchor="middle">(</text>
+        <text x="17" y="41" className="dacs" textAnchor="middle">)</text>
       </>
     }
   </svg>

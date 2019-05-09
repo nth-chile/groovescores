@@ -107,6 +107,10 @@ const Composer = styled(UnstyledComposer)<ComposerProps>`
     margin-right: auto;
   }
 
+  .dacs {
+    transform: scale(.6)
+  }
+
   .groove {
     background-color: ${commonStyles.colors.offwhite};
     border-radius: 3px;

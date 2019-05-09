@@ -24,8 +24,8 @@ const WholeNote = (NoteProps) =>
     {
       NoteProps.ghostNote &&
       <>
-        <text x="0" y="8" className="dacs" textAnchor="middle">(</text>
-        <text x="13" y="8" className="dacs" textAnchor="middle">)</text>
+        <text x="-1" y="13" className="dacs" textAnchor="middle">(</text>
+        <text x="22" y="13" className="dacs" textAnchor="middle">)</text>
       </>
     }
   </svg>

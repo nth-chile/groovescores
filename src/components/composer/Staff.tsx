@@ -124,7 +124,7 @@ const UnstyledStaff = (StaffProps) => {
     // `note` will be the abc notation inside of the square brackets
     let note: string
     
-    if (toolbarState.noteType === "note") {
+    if (toolbarState.noteType === "note" || toolbarState.noteType === "ghost note") {
       note = utils.intendedNoteByMouseY(mouseOffset[1] * SVG_SCALE)
     } else if (toolbarState.noteType === "rest") {
       note = "z"
@@ -141,7 +141,7 @@ const UnstyledStaff = (StaffProps) => {
     // Clicked note is longer than unplaced note
     else if (clickedNoteLength > unplacedNoteLength ) {
       // Replace clickedNote with unplacedNote
-      const unplacedAbc = `[${note}]${toolbarState.noteLength}`
+      const unplacedAbc = `[${ghostNoteModifier}${note}]${toolbarState.noteLength}`
       newContent[barIndex].notes.splice(clickedNoteIndex, 1, unplacedAbc)
 
       // Fill remainder with rests, starting with rests the same length as unplacedNote
