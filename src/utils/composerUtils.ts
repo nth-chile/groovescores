@@ -66,9 +66,9 @@ export const floatToFraction = (float: number) => {
     case .125: return "1/8"
     case .25: return "1/4"
     case .5: return "1/2"
-    case 1: return "1"
-    case 2: return "2"
-    case 4: return "4"
+    case 1: return "1/1"
+    case 2: return "2/1"
+    case 4: return "4/1"
   }
 }
 
@@ -115,6 +115,7 @@ export const getNoteLengthAsFloat = (abcNote: string, meter: string = "4/4") => 
 
 // Takes abcNote (e.x., "[z]2"), returns fraction (string) representing duration of note
 export const getNoteLengthAsFraction = (abcNote: string) : string => {
+  console.log(abcNote)
   const regex = /(?!])(\d+)(?:\/)*(\d+)*/
   const matchArray = abcNote.match(regex)
   return `${matchArray[1]}/${matchArray[2] || 1}`
@@ -128,7 +129,7 @@ export const getNoteWidthInPx = (abcNote: string, barWidth: number) => {
 }
 
 // Returns abc notation for a note based on cursor's y-position on the staff. Used for displaying unplaced notes
-export const intendedNoteByMouseY = (y: number) : string | false => {
+export const intendedNoteByMouseY = (y: number) : string => {
   switch(true) {
     case (aSelectionTop < y && y <= gSelectionTop): return "^A'"
     case (gSelectionTop < y && y <= fSelectionTop): return "^g"
@@ -142,7 +143,6 @@ export const intendedNoteByMouseY = (y: number) : string | false => {
     case (FSelectionTop < y && y <= ESelectionTop): return "F"
     case (ESelectionTop < y && y <= DSelectionTop): return "E"
     case (DSelectionTop < y && y <= DSelectionBottom): return "^D"
-    default: return false
   }
 }
 

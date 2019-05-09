@@ -120,11 +120,21 @@ const UnstyledStaff = (StaffProps) => {
     // This starts at 1, so that a "next note" can be defined as being 1 index after clickedNoteIndex
     let nextNoteIndexOffset = 1
 
+    // `note` will be the abc notation inside of the square brackets
+    let note: string
+    
+    if (toolbarState.noteType === "note") {
+      note = utils.intendedNoteByMouseY(mouseOffset[1] * SVG_SCALE)
+    } else if (toolbarState.noteType === "rest") {
+      note = "z"
+    }
+
+    console.log(toolbarState.noteType)
+
     // Clicked note is exactly as long as unplaced note. Remove clickedNote, add unplacedNote
     if (clickedNoteLength - unplacedNoteLength === 0) {
-      const unplacedAbc = `[${utils.intendedNoteByMouseY(mouseOffset[1] * SVG_SCALE)}]${toolbarState.noteLength}`
+      const unplacedAbc = `[${note}]${toolbarState.noteLength}`
       newContent[barIndex].notes.splice(clickedNoteIndex, 1, unplacedAbc)
-      
       setContent(newContent)
       return
     } 
@@ -132,7 +142,7 @@ const UnstyledStaff = (StaffProps) => {
     // Clicked note is longer than unplaced note
     else if (clickedNoteLength > unplacedNoteLength ) {
       // Replace clickedNote with unplacedNote
-      const unplacedAbc = `[${utils.intendedNoteByMouseY(mouseOffset[1] * SVG_SCALE)}]${toolbarState.noteLength}`
+      const unplacedAbc = `[${note}]${toolbarState.noteLength}`
       newContent[barIndex].notes.splice(clickedNoteIndex, 1, unplacedAbc)
 
       // Fill remainder with rests, starting with rests the same length as unplacedNote
@@ -211,33 +221,43 @@ const UnstyledStaff = (StaffProps) => {
       let noteLength: number;
 
       switch (true) {
-        case accumulatedRemovedNotesLength > 4:
+        case accumulatedRemovedNotesLength >= 4:
           noteLength = 4
           break;
-        case accumulatedRemovedNotesLength > 2:
+        case accumulatedRemovedNotesLength >= 2:
           noteLength = 2
           break;
-        case accumulatedRemovedNotesLength > 1:
+        case accumulatedRemovedNotesLength >= 1:
           noteLength = 1
           break;
-        case accumulatedRemovedNotesLength > .5:
+        case accumulatedRemovedNotesLength >= .5:
           noteLength = .5
           break;
-        case accumulatedRemovedNotesLength > .25:
+        case accumulatedRemovedNotesLength >= .25:
           noteLength = .25
           break;
-        case accumulatedRemovedNotesLength > .125:
+        case accumulatedRemovedNotesLength >= .125:
           noteLength = .125
       }
 
       const restLength = accumulatedRemovedNotesLength - noteLength;
 
       // Finally, add the unplacedNote
-      const unplacedNote = `[${utils.intendedNoteByMouseY(mouseOffset[1] * SVG_SCALE)}]${utils.floatToFraction(noteLength)}`
-      const unplacedRest = `[z]${utils.floatToFraction(restLength)}`
+      const unplacedNote = `[${note}]${utils.floatToFraction(noteLength)}`
 
-      console.log(accumulatedRemovedNotesLength,restLength,noteLength, unplacedNote, unplacedRest)
-      newContent[barIndex].notes.splice(clickedNoteIndex, 0, unplacedNote, unplacedRest)
+      console.log(`
+      restLength: ${restLength}
+      noteLength: ${noteLength}
+      unplacedNote: ${unplacedNote}
+      `)
+
+      newContent[barIndex].notes.splice(clickedNoteIndex, 0, unplacedNote)
+
+      // And any remainder as rest
+      if (restLength > 0) {
+        const unplacedRest = `[z]${utils.floatToFraction(restLength)}`
+        newContent[barIndex].notes.splice(clickedNoteIndex + 1, 0, unplacedRest)
+      }
     }
 
     setContent(newContent)
