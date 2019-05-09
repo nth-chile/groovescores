@@ -49,7 +49,7 @@ const HalfNote = (NoteProps) => {
         </>
       }
 
-      {NoteProps.includeLedger && <text x="0" y="21"></text>}
+{NoteProps.includeLedger && <text x="0" y="21"></text>}
     </svg>
   )
 }
