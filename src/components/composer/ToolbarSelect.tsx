@@ -3,37 +3,44 @@ import styled from "styled-components"
 import * as styles from "../../commonStyles"
 //import console = require("console");
 
-interface ToolbarSelectProps {
+interface Props {
   className?: string;
   initialValue: string;
+  disabled?: boolean;
   options: Array<string>;
   handleSelect: object;
 }
 
-const UnstyledToolbarSelect = (ToolbarSelectProps) => {
-  const [selectedValue, setSelectedValue] = useState(ToolbarSelectProps.initialValue)
+const UnstyledToolbarSelect = (Props) => {
+  const [selectedValue, setSelectedValue] = useState(Props.initialValue)
   const [isClosed, toggleClosed] = useState(true)
 
   const handleClick = (option) => {
+    if (Props.disabled) return
     setSelectedValue(option)
     toggleClosed(!isClosed)
-    ToolbarSelectProps.handleSelect(option.toLowerCase())
+    Props.handleSelect(option.toLowerCase())
+  }
+
+  const handleToggleClosed = () => {
+    if (Props.disabled) return
+    toggleClosed(!isClosed)
   }
 
   return (
-    <div className={ToolbarSelectProps.className}>
+    <div className={`${Props.disabled && "opacity-7"} ${Props.className}`}>
       <svg className="dropdownArrow" xmlns="http://www.w3.org/2000/svg" width="11" height="6">
         <path fill="#363636" fillRule="nonzero" d="M10.54957758.62438761L5.58578604 5.78369514.62199447.6243877z"/>
       </svg>
 
       <div
         className="dropdownBox"
-        onClick={() => toggleClosed(!isClosed)}
+        onClick={handleToggleClosed}
       >{selectedValue}</div>
 
       <ul style={{ display: isClosed ? "none" : "inline-block" }}>
         {
-          ToolbarSelectProps.options.map(option =>
+          Props.options.map(option =>
             <li
               key={option}
               onClick={(e) => handleClick(option)}
@@ -47,12 +54,12 @@ const UnstyledToolbarSelect = (ToolbarSelectProps) => {
   )
 }
 
-const ToolbarSelect = styled(UnstyledToolbarSelect)<ToolbarSelectProps>`
+const ToolbarSelect = styled(UnstyledToolbarSelect)<Props>`
   ${styles.openSansSmall}
   box-sizing: border-box;
   border: 1px solid ${styles.colors.black};
   border-radius: 3px;
-  cursor: pointer;
+  cursor: ${Props => Props.disabled ? "not-allowed" : "pointer"};
   display: inline-block;
   margin-right: 5px;
   position: relative;

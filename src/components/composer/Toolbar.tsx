@@ -1,7 +1,7 @@
 import React, { useState } from "react"
 import styled from "styled-components"
 import * as styles from "../../commonStyles"
-import { ToolbarSelect } from "."
+import { ToolbarButton, ToolbarSelect } from "."
 import { Button, Modal } from ".."
 
 interface ToolbarProps {
@@ -9,6 +9,8 @@ interface ToolbarProps {
   setMeter: object;
   setNoteLength: object;
   setNoteType: object;
+  setToolType: object;
+  toolType: string;
 }
 
 const UnstyledToolbar = (ToolbarProps) => {
@@ -38,20 +40,53 @@ const UnstyledToolbar = (ToolbarProps) => {
     <>
       <div className={ToolbarProps.className}>
         <ToolbarSelect
+          initialValue={"Add tool"}
+          options={["Add tool", "Select tool"]}
+          handleSelect={ToolbarProps.setToolType}
+        />
+        <ToolbarSelect
           initialValue={"4/4"}
           options={["4/4", "2/4", "3/4", "6/8"]}
           handleSelect={handleTimeSigSelect}
         />
-        <ToolbarSelect
-          initialValue={"Note"}
-          options={["Note", "Rest", "Ghost Note"]}
-          handleSelect={ToolbarProps.setNoteType}
-        />
-        <ToolbarSelect
-          initialValue={"1/4"}
-          options={["1", "1/2", "1/4", "1/8", "1/16", "1/32"]}
-          handleSelect={ToolbarProps.setNoteLength}
-        />
+
+        {
+          ToolbarProps.toolType === "add tool" &&
+          <>
+            <ToolbarSelect
+              initialValue={"Note"}
+              options={["Note", "Rest", "Ghost Note"]}
+              handleSelect={ToolbarProps.setNoteType}
+            />
+            <ToolbarSelect
+              initialValue={"1/4"}
+              options={["1", "1/2", "1/4", "1/8", "1/16", "1/32"]}
+              handleSelect={ToolbarProps.setNoteLength}
+            />
+          </>
+        }
+
+        {
+          ToolbarProps.toolType === "select tool" &&
+          <>
+            <ToolbarButton>Subtract Grace Note</ToolbarButton>
+            <ToolbarButton>Add Grace Note</ToolbarButton>
+            <ToolbarButton>open hi hat or rim click</ToolbarButton>
+            <ToolbarSelect
+              disabled
+              initialValue={"Closed Hi-hat"}
+              options={["Open Hi-hat", "Closed Hi-hat"]}
+              handleSelect={ToolbarProps.setNoteVariation}
+            />
+            {/* <ToolbarSelect
+              initialValue={"Regular"}
+              options={["Regular", "Cross stick"]}
+              handleSelect={ToolbarProps.setNoteVariation}
+            /> */}
+            <ToolbarButton>Remove Note</ToolbarButton>
+          </>
+        }
+        
       </div>
 
       {

@@ -40,9 +40,7 @@ const EighthNote = (NoteProps) => {
         top: `${NoteProps.y - 35}px`
       }}
     >
-
       {renderSymbol()}
-
       {
         NoteProps.ghostNote &&
         <>
@@ -50,7 +48,6 @@ const EighthNote = (NoteProps) => {
           <text x="17" y="41" className="dacs" textAnchor="middle">)</text>
         </>
       }
-
       {NoteProps.includeLedger && <text x="0" y="21"></text>}
     </svg>
   )

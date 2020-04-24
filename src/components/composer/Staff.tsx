@@ -4,6 +4,7 @@ import throttle from "lodash/throttle"
 import { AbcToSVGNote, Note } from "."
 import * as NoteSVGs from "./noteSVGs"
 import * as utils from "../../utils"
+const uuid = require('uuid/v4');
 
 const SVG_HEIGHT = 67.5
 const SVG_WIDTH = 400
@@ -50,7 +51,7 @@ const UnstyledStaff = (StaffProps) => {
 
   const [mouseOffset, setMouseOffset] = useState(null)
   const [unplacedNotePosition, setUnplacedNotePosition] = useState(null)
- 
+
   const staffLineWidthBeforeScale = SVG_WIDTH < maxWidth - (SVG_WIDTH_TIMES_SCALE - SVG_WIDTH) ? SVG_WIDTH - 1.5 : SVG_WIDTH * maxWidth / SVG_WIDTH_TIMES_SCALE - 1.5
   const staffLineWidthAfterScale = staffLineWidthBeforeScale * SVG_SCALE
 
@@ -70,7 +71,7 @@ const UnstyledStaff = (StaffProps) => {
     newContent[0].notes = ["[z]4"]
     newContent[1].notes = ["[z]4"]
     setContent(newContent)
-  }, [StaffProps.toolbarState.meter] )
+  }, [StaffProps.toolbarState.meter])
 
   // Update content when content[x].notes changes
   useEffect(() => {
@@ -82,7 +83,7 @@ const UnstyledStaff = (StaffProps) => {
       let newNoteStartPositions = [];
 
       // Get and push note start positions to newNoteStartPositions
-      for(let j = 0; j < content[i].notes.length; j++) {
+      for (let j = 0; j < content[i].notes.length; j++) {
         const currentNoteWidth = utils.getBalancedNoteWidthInPx(content[i].notes, j, content[i].barWidth)
         let currentNoteStartPos = notePos
         notePos += currentNoteWidth
@@ -94,7 +95,6 @@ const UnstyledStaff = (StaffProps) => {
 
         newNoteStartPositions.push(currentNoteStartPos)
       }
-
       // Update newContent
       newContent[i] = {
         ...newContent[i],
@@ -104,67 +104,72 @@ const UnstyledStaff = (StaffProps) => {
 
     // Set content
     setContent(newContent)
-  }, [ content[0].notes.join(","), content[1].notes.join(",") ])
+  }, [content[0].notes.join(","), content[1].notes.join(",")])
 
-  // Define event listeners
+  // Define event handlers
   const mousemoveHandler = useCallback(throttle((e) => {
+    const intendedNote = utils.intendedNoteByMouseY(e.offsetY * SVG_SCALE)
+    const noteYPos = intendedNote && utils.noteTopPosByAbcNote[intendedNote]
+    const noteData = intendedNoteDataByMouseX(e.offsetX)
+    const noteXPos = content[noteData.barIndex].noteStartPositions[noteData.noteIndex]
+    setUnplacedNotePosition([noteXPos, noteYPos])
     setMouseOffset([e.offsetX, e.offsetY])
-  }, 25, {leading: true, trailing: false}), [])
+  }, 25, { leading: true, trailing: false }), [content])
 
   const clickHandler = (e) => {
     const { barIndex, noteIndex: clickedNoteIndex } = intendedNoteDataByMouseX(e.offsetX)
 
-    const ghostNoteModifier = toolbarState.noteType === "ghost note" ? "!(.!!).!" : "" 
+    const ghostNoteModifier = toolbarState.noteType === "ghost note" ? "!(.!!).!" : ""
     const clickedNoteLength = utils.getNoteLengthAsFloat(content[barIndex].notes[clickedNoteIndex], toolbarState.meter)
     const unplacedNoteLength = utils.getNoteLengthAsFloat(toolbarState.noteLength, toolbarState.meter)
     const newContent = [...content]
     // This starts at 1, so that a "next note" can be defined as being 1 index after clickedNoteIndex
     let nextNoteIndexOffset = 1
-
     // `note` will be the abc notation inside of the square brackets
     let note: string
-    
+
     if (toolbarState.noteType === "note" || toolbarState.noteType === "ghost note") {
       note = utils.intendedNoteByMouseY(mouseOffset[1] * SVG_SCALE)
     } else if (toolbarState.noteType === "rest") {
       note = "z"
     }
 
-    // Clicked note is exactly as long as unplaced note. Remove clickedNote, add unplacedNote
+    // Clicked note is exactly as long as unplaced note. Remove clickedNote if its a rest, and add unplacedNote after "["
     if (clickedNoteLength - unplacedNoteLength === 0) {
-      const unplacedAbc = `[${ghostNoteModifier}${note}]${toolbarState.noteLength}`
+      let clickedNote = newContent[barIndex].notes[clickedNoteIndex].split("[")[1].split("]")[0]
+      // If clickedNote contains a rest or `note`, remove it
+      clickedNote = clickedNote.replace("z", "").replace(note, "")
+      const unplacedAbc = note === "z" ? `[z]${clickedNoteLength}` : `[${ghostNoteModifier}${note}${clickedNote}]${utils.floatToFraction(clickedNoteLength)}`
       newContent[barIndex].notes.splice(clickedNoteIndex, 1, unplacedAbc)
       setContent(newContent)
       return
-    } 
-    
-    // Clicked note is longer than unplaced note
-    else if (clickedNoteLength > unplacedNoteLength ) {
-      // Replace clickedNote with unplacedNote
-      const unplacedAbc = `[${ghostNoteModifier}${note}]${toolbarState.noteLength}`
-      newContent[barIndex].notes.splice(clickedNoteIndex, 1, unplacedAbc)
+    }
 
+    // Clicked note is longer than unplaced note
+    else if (clickedNoteLength > unplacedNoteLength) {
+      // Add unplacedNote, change unplacedNote's length to clickedNote's length
+      let clickedNote = newContent[barIndex].notes[clickedNoteIndex].split("[")[1].split("]")[0]
+      // If clickedNote contains a rest or `note`, remove it
+      clickedNote = clickedNote.replace("z", "").replace(note, "")
+      const unplacedAbc = `[${ghostNoteModifier}${note}${clickedNote}]${toolbarState.noteLength}`
+      newContent[barIndex].notes.splice(clickedNoteIndex, 1, unplacedAbc)
       // Fill remainder with rests, starting with rests the same length as unplacedNote
       let restFloatValueToPlace = clickedNoteLength - unplacedNoteLength
 
       while (restFloatValueToPlace > 0) {
         // Either restFloatValueToPlace is bigger, smaller, or the same as unplacedNoteLength
-        
+
         // If it's the same, put in a rest of length === clickedNoteLength. Update restFloatValueToPlace.
         if (restFloatValueToPlace === unplacedNoteLength) {
           newContent[barIndex].notes.splice(clickedNoteIndex + 1, 0, "[z]" + toolbarState.noteLength)
           restFloatValueToPlace -= unplacedNoteLength
         }
-        
-        // If restFloatValueToPlace is smaller than unplacedNoteLength. TODO for dotted notes, triplets, and 3/4 meter
+
+        // If restFloatValueToPlace is smaller than unplacedNoteLength. TODO for 3/4 meter
         else if (restFloatValueToPlace < unplacedNoteLength) {
-          console.log('restFloatValueToPlace < unplacedNoteLength. Are you in 3/4 time, or using dotted notes or triplets?')
-          // const rest = "[z]" + utils.floatToFraction(nextNoteLength)
-          // newContent[barIndex].notes.splice(clickedNoteIndex + nextNoteIndexOffset, 1, rest)
-          // restFloatValueToPlace -= nextNoteLength
-          // nextNoteIndexOffset++
+          console.log('restFloatValueToPlace < unplacedNoteLength. Are you in 3/4 time?')
         }
-        
+
         // If restFloatValueToPlace is bigger than unplacedNoteLength, add the rest, subtract unplacedNoteLength from restFloatValueToPlace and increment nextNoteIndexOffset
         else if (restFloatValueToPlace > unplacedNoteLength) {
           const rest = "[z]" + toolbarState.noteLength
@@ -174,17 +179,20 @@ const UnstyledStaff = (StaffProps) => {
         }
       }
     }
-    
+
     // Clicked note is shorter than unplaced note
     else if (clickedNoteLength < unplacedNoteLength) {
-      // First, remove the clicked note and decrement nextNoteIndexOffset
-      newContent[barIndex].notes.splice(clickedNoteIndex, 1)
-      nextNoteIndexOffset--
+      // Add unplacedNote and change length to unplacedNoteLength
+      let clickedNote = newContent[barIndex].notes[clickedNoteIndex].split("[")[1].split("]")[0]
+      // If clickedNote contains a rest or `note`, remove it
+      clickedNote = clickedNote.replace("z", "").replace(note, "")
+      const unplacedAbc = `[${ghostNoteModifier}${note}${clickedNote}]${utils.floatToFraction(unplacedNoteLength)}`
+      newContent[barIndex].notes.splice(clickedNoteIndex, 1, unplacedAbc)
 
-      // accumulatedRemovedNotesLength is the number that tells us if enough notes have been removed in order to add the unplacedNote
+      // accumulatedRemovedNotesLength is the number that tells us if enough notes have been removed
       let accumulatedRemovedNotesLength = clickedNoteLength
 
-      while(accumulatedRemovedNotesLength < unplacedNoteLength) {
+      while (accumulatedRemovedNotesLength < unplacedNoteLength) {
         // The next note either doesnt exist, is longer, shorter, or the same as unplacedNoteLength - clickedNoteLength
 
         // If the note doesnt exist, exit the loop
@@ -194,20 +202,14 @@ const UnstyledStaff = (StaffProps) => {
 
         const nextNoteLength: number = utils.getNoteLengthAsFloat(newContent[barIndex].notes[clickedNoteIndex + nextNoteIndexOffset], toolbarState.meter)
 
-        // If the next note is the same, remove it and add its length to accumulatedRemovedNotesLength
-        if (nextNoteLength === unplacedNoteLength - clickedNoteLength) {
-          newContent[barIndex].notes.splice(clickedNoteIndex + nextNoteIndexOffset, 1)
-          accumulatedRemovedNotesLength += nextNoteLength
-        }
-
-        // If the next note is shorter, remove it, add its length to accumulatedRemovedNotesLength and don't increment nextNoteIndexOffset
-        else if(nextNoteLength < unplacedNoteLength - clickedNoteLength) {
+        // If the next note is the same or shorter, remove it and add its length to accumulatedRemovedNotesLength
+        if (nextNoteLength === unplacedNoteLength - clickedNoteLength || nextNoteLength < unplacedNoteLength - clickedNoteLength) {
           newContent[barIndex].notes.splice(clickedNoteIndex + nextNoteIndexOffset, 1)
           accumulatedRemovedNotesLength += nextNoteLength
         }
 
         // If the next note is longer, how much longer? Replace it with itself minus the difference
-        else if(nextNoteLength > unplacedNoteLength - clickedNoteLength) {
+        else if (nextNoteLength > unplacedNoteLength - clickedNoteLength) {
           const lengthAsFraction = utils.floatToFraction(nextNoteLength - (unplacedNoteLength - clickedNoteLength))
           const note = newContent[barIndex].notes[clickedNoteIndex + nextNoteIndexOffset]
           const noteWithoutLength = note.split("]")[0] + "]"
@@ -243,8 +245,8 @@ const UnstyledStaff = (StaffProps) => {
       }
 
       // Finally, add the unplacedNote
-      const unplacedNote = `[${ghostNoteModifier}${note}]${utils.floatToFraction(noteLength)}`
-      newContent[barIndex].notes.splice(clickedNoteIndex, 0, unplacedNote)
+      //const unplacedNote = `[${ghostNoteModifier}${note}]${utils.floatToFraction(noteLength)}`
+      //newContent[barIndex].notes.splice(clickedNoteIndex, 0, unplacedNote)
 
       // And any remainder as rest
       const restLength = accumulatedRemovedNotesLength - noteLength;
@@ -275,20 +277,9 @@ const UnstyledStaff = (StaffProps) => {
     }
   })
 
-  useEffect(() => {
-    if (mouseOffset !== null) {
-      const intendedNote = utils.intendedNoteByMouseY(mouseOffset[1] * SVG_SCALE)
-      const noteYPos = intendedNote && utils.noteTopPosByAbcNote[intendedNote]
-      const noteData = intendedNoteDataByMouseX(mouseOffset[0])
-      const noteXPos = content[noteData.barIndex].noteStartPositions[noteData.noteIndex]
-
-      setUnplacedNotePosition([noteXPos, noteYPos])
-    }
-  }, [mouseOffset])
-
-  const intendedNoteDataByMouseX = (x: number) : { barIndex: number , noteIndex: number, noteWidth: number }  => {
+  const intendedNoteDataByMouseX = (x: number): { barIndex: number, noteIndex: number, noteWidth: number } => {
     x *= SVG_SCALE
-    
+
     const barIndex = x < firstBarLinePosAfterScale ? 0 : 1
     const notes = content[barIndex].notes
     let accumulatedContentWidth: number = 0
@@ -296,7 +287,7 @@ const UnstyledStaff = (StaffProps) => {
     let noteIndex: number;
     let noteWidth: number;
 
-    for(let i = 0; i < content[barIndex].noteStartPositions.length; i++) {
+    for (let i = 0; i < content[barIndex].noteStartPositions.length; i++) {
       const startPos = content[barIndex].noteStartPositions[i]
       const prevStartPos = content[barIndex].noteStartPositions[i - 1]
 
@@ -330,13 +321,17 @@ const UnstyledStaff = (StaffProps) => {
       const currentNoteWidth = utils.getBalancedNoteWidthInPx(notes, i, content[barIndex].barWidth)
       let currentNoteStartPos = notePos
       notePos += currentNoteWidth
+      const noteLength = note.split("]")[1]
 
       // Exception: if only one note, center it
       if (content[barIndex].notes.length === 1) {
         currentNoteStartPos = content[barIndex].barStart + (content[barIndex].barWidth / 2) - 5
       }
 
-      return <AbcToSVGNote  abc={note} key={i} SVGScale={SVG_SCALE} x={currentNoteStartPos} />
+      // split notes into array in case of something like [cB]
+      const noteArr = utils.splitNoteGroup(note)
+
+      return noteArr.map((note, j) => <AbcToSVGNote abc={`[${note}]${noteLength}`} key={uuid()} SVGScale={SVG_SCALE} x={currentNoteStartPos} />)
     })
   }
 
@@ -393,7 +388,7 @@ const UnstyledStaff = (StaffProps) => {
   )
 }
 
-const Staff = styled(UnstyledStaff)<StaffProps>`
+const Staff = styled(UnstyledStaff) <StaffProps>`
   position: relative;
 
   svg.music {

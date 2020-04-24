@@ -210,3 +210,27 @@ export const splitFloatTotalIntoNoteFloats = (total: number, iterations = 0): Ar
   
   return arr
 }
+
+// Takes a note group, and returns array of notes
+// "[f^A']1" --> ["f", "^A'"]
+// "c" --> ["c"]
+export const splitNoteGroup = (abc) : Array<string> => {
+  const result = []
+  const allNotes = ["^A'", "^g", "f", "e", "d", "c", "B", "A", "G", "F", "E", "^D", "z"]
+  
+  const search = () => {
+    for (let i = 0; i < allNotes.length; i++) {
+      const indexOf = abc.indexOf(allNotes[i])
+
+      if (indexOf !== -1) {
+        abc = abc.substring(0, indexOf) + abc.substring(indexOf + allNotes[i].length)
+        result.push(allNotes[i])
+        return search()
+      }
+    }
+  }
+  
+  search()
+  
+  return result
+}

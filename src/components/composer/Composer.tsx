@@ -18,6 +18,7 @@ const UnstyledComposer = (ComposerProps) => {
   const [meter, setMeter] = useState("4/4")
   const [noteType, setNoteType] = useState("note")
   const [noteLength, setNoteLength] = useState("1")
+  const [toolType, setToolType] = useState("add tool")
 
   const container = useRef(null)
   const xPadding = 66; // The x-padding of .groove
@@ -65,6 +66,8 @@ const UnstyledComposer = (ComposerProps) => {
             setMeter={setMeter}
             setNoteType={setNoteType}
             setNoteLength={handleSetNoteLength}
+            setToolType={setToolType}
+            toolType={toolType}
           />
 
           <div className="groove" ref={container}>
